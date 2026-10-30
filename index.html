@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎢 Cycloid Roller Coaster Lab</title>
+<style>
+:root{
+  --bg:#eef3f8; --card:#ffffff; --ink:#1d2633; --muted:#64748b;
+  --line:#dbe3ec; --accent:#315efb; --accent2:#15aabf;
+  --danger:#ef4444; --shadow:0 14px 40px rgba(31,43,64,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(180deg,#eef4fb 0%,#f8fafc 55%,#eef3f8 100%);
+  color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
+header{padding:42px 6vw 30px;background:
+  radial-gradient(circle at 80% 20%,rgba(255,255,255,.26),transparent 22%),
+  linear-gradient(135deg,#15233f,#274d83 58%,#3d6fc7);color:white;position:relative;overflow:hidden}
+header:after{content:"";position:absolute;inset:auto -10% -90px -10%;height:170px;border-radius:50%;background:rgba(255,255,255,.07)}
+.eyebrow{font-size:13px;letter-spacing:.12em;opacity:.75;font-weight:800}
+h1{margin:8px 0 8px;font-size:clamp(30px,4vw,52px);line-height:1.08}
+.hero-sub{max-width:820px;margin:0;color:#dfe9ff;line-height:1.7}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.badge{padding:7px 11px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.08);font-size:12px}
+
+main{max-width:1240px;margin:28px auto;padding:0 18px}
+.card{background:var(--card);border:1px solid rgba(219,227,236,.9);border-radius:22px;box-shadow:var(--shadow);padding:22px;margin-bottom:20px}
+.card h2{margin:0 0 14px;font-size:20px}
+.desc{color:var(--muted);line-height:1.65;font-size:14px}
+
+.grid2{display:grid;grid-template-columns:1.35fr .65fr;gap:20px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+
+.controls{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:12px}
+@media(max-width:760px){.controls{grid-template-columns:repeat(2,1fr)}}
+label{display:block;font-size:12px;font-weight:800;color:#475569}
+input,select,button{font:inherit}
+input,select{width:100%;margin-top:7px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fbfdff;color:var(--ink)}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{padding:11px 16px;border:0;border-radius:12px;font-weight:800;cursor:pointer}
+.primary{background:#1d4ed8;color:#fff}.ghost{background:#eaf0f8;color:#223047}.danger{background:#fee2e2;color:#991b1b}
+button:active{transform:translateY(1px)}
+
+.stage-card{overflow:hidden}
+.stage-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}
+.live{font-size:13px;color:#334155;background:#f1f5f9;border-radius:999px;padding:7px 10px}
+.stage{position:relative;background:
+  linear-gradient(#dcecff 0 60%,#eaf7ef 60% 100%);
+  border:1px solid var(--line);border-radius:18px;overflow:hidden}
+#scene{display:block;width:100%;height:auto;min-height:360px}
+.sun{fill:#ffd76b}
+.cloud{fill:#fff;opacity:.85}
+.track{fill:none;stroke:#27364a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.track-glow{fill:none;stroke:#91a7c1;stroke-width:13;stroke-linecap:round;stroke-linejoin:round;opacity:.35}
+.support{stroke:#96a3b4;stroke-width:4}
+.train{fill:#ef4444;stroke:#8e1b1b;stroke-width:2}
+.wheel{fill:#111827}
+.seat{fill:#fff}
+.ball{fill:#315efb}
+.land{fill:#b9dfbe}
+.water{fill:#9cd6e4;opacity:.65}
+.marker{stroke:#315efb;stroke-width:2;stroke-dasharray:7 6}
+.markerText{font-size:14px;font-weight:800;fill:#274060}
+.stage-caption{padding:11px 13px;color:#526274;font-size:12px;background:#fff}
+
+.stats{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:11px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:#f7f9fc;border:1px solid var(--line);border-radius:16px;padding:15px}
+.stat small{display:block;color:var(--muted);font-size:12px;font-weight:700}
+.stat strong{display:block;margin-top:7px;font-size:24px}
+.time-stat{background:linear-gradient(135deg,#f2f7ff,#eefcf9);border-color:#cfe0f6}
+.time-stat strong{font-size:28px}
+.unit{font-size:13px;color:var(--muted);font-weight:700}
+
+.formula{
+  background:linear-gradient(135deg,#f7faff,#f3fbfc);
+  border:1px solid #dce7f4;border-radius:18px;padding:18px 20px;margin-top:12px
+}
+.formula-title{font-size:12px;font-weight:900;color:#58708c;letter-spacing:.08em;margin-bottom:6px}
+math{font-size:1.25em}
+math + math{margin-left:18px}
+.explain{font-size:14px;line-height:1.75;color:#4b5b70;margin-top:12px}
+
+.chartbox{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fcfdff}
+.chart-title{font-weight:900;font-size:13px;margin:3px 0 8px}
+svg.chart{width:100%;height:280px;display:block}
+.axis{stroke:#94a3b8;stroke-width:1.3}
+.gridline{stroke:#e7edf3;stroke-width:1}
+.label{fill:#66758a;font-size:11px}
+.lineY{fill:none;stroke:#315efb;stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.lineV{fill:none;stroke:#ef4444;stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:15px}
+table{width:100%;border-collapse:collapse;min-width:760px;font-size:12px}
+th,td{padding:9px 10px;border-bottom:1px solid #edf1f5;text-align:right;white-space:nowrap}
+th{position:sticky;top:0;background:#f5f8fb;color:#46566d}
+tr:last-child td{border-bottom:0}
+.insight{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:800px){.insight{grid-template-columns:1fr}}
+.insight div{padding:16px;border:1px solid var(--line);border-radius:16px;background:#fbfdff;line-height:1.65;font-size:14px}
+.insight b{display:block;margin-bottom:6px}
+
+.footer{text-align:center;color:#748096;font-size:12px;padding:18px 0 36px}
+
+/* Added: LEGO-style track builder + self-powered coaster mode */
+.quick-link{display:inline-flex;align-items:center;text-decoration:none;color:#fff;font-weight:800}
+.maker-section{scroll-margin-top:18px}
+.maker-intro{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.maker-kicker{font-size:12px;font-weight:900;letter-spacing:.1em;color:#315efb}
+.maker-pill{display:inline-flex;align-items:center;gap:6px;background:#eef4ff;border:1px solid #d7e3ff;color:#244ab4;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800}
+.maker-callout{border:1px solid #d8e5f5;background:linear-gradient(135deg,#f6faff,#f0fbfb);padding:15px 17px;border-radius:16px;line-height:1.7;font-size:13px;color:#4b5b70;margin:14px 0}
+.maker-controls{display:grid;grid-template-columns:repeat(5,minmax(125px,1fr));gap:12px;margin-top:14px}
+@media(max-width:1000px){.maker-controls{grid-template-columns:repeat(3,minmax(120px,1fr))}}
+@media(max-width:680px){.maker-controls{grid-template-columns:repeat(2,minmax(120px,1fr))}}
+.maker-layout{display:grid;grid-template-columns:minmax(245px,.72fr) minmax(0,1.75fr);gap:16px;align-items:start}
+@media(max-width:960px){.maker-layout{grid-template-columns:1fr}}
+.maker-side{display:grid;gap:14px;min-width:0}
+.maker-subcard{background:#fbfdff;border:1px solid var(--line);border-radius:18px;padding:15px;min-width:0}
+.maker-subcard h3{font-size:15px;margin:0 0 10px}
+.part-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.part-btn{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:91px;padding:11px;border:1px solid #dbe5f0;background:#fff;color:#26364a;text-align:left;border-radius:13px;transition:transform .12s,border-color .12s,box-shadow .12s}
+.part-btn:hover{border-color:#8eabfa;box-shadow:0 5px 16px rgba(49,94,251,.10);transform:translateY(-1px)}
+.part-btn .part-icon{font-size:22px;line-height:1.1}
+.part-btn strong{font-size:12px;line-height:1.3}
+.part-btn small{font-size:10px;color:#728198;line-height:1.35;font-weight:600}
+.part-btn[draggable="true"]{cursor:grab}
+.piece-list{display:grid;gap:7px;max-height:395px;overflow:auto;padding:2px}
+.piece-item{display:grid;grid-template-columns:7px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px;border:1px solid #e0e7ef;border-radius:12px;background:#fff;cursor:pointer}
+.piece-item.selected{border-color:#7fa1ff;background:#f1f6ff;box-shadow:0 0 0 2px rgba(49,94,251,.08)}
+.piece-item.dragging{opacity:.45}
+.piece-color{width:6px;height:34px;border-radius:99px}
+.piece-name{font-size:12px;font-weight:900;line-height:1.3}
+.piece-meta{font-size:10px;color:#728198;margin-top:3px}
+.piece-actions{display:flex;gap:3px}
+.piece-actions button{padding:5px 7px;border-radius:8px;background:#eef2f7;color:#3d4b60;font-size:11px}
+.piece-actions .remove-piece{background:#fff0f0;color:#a22a2a}
+.maker-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:11px}
+.maker-edit-grid label{font-size:11px}
+.maker-edit-grid input{padding:9px 10px}
+.maker-stage{background:#f8fbff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.maker-stage-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;padding:14px 15px 6px}
+.maker-stage-top h3{margin:0 0 5px;font-size:16px}
+.maker-status{display:inline-flex;padding:7px 11px;border:1px solid #d7e3f1;background:#f0f5fb;border-radius:999px;font-size:12px;color:#34465c;font-weight:800}
+.maker-status.good{background:#ecfdf5;border-color:#b6ead1;color:#08764f}
+.maker-status.warn{background:#fff7e6;border-color:#f9d89b;color:#8a5700}
+.maker-status.bad{background:#fff0f0;border-color:#f7b5b5;color:#a11d1d}
+#makerScene{display:block;width:100%;height:auto;min-height:280px;background:#dcecff;touch-action:pan-y}
+.maker-caption{padding:10px 13px;background:white;color:#607086;font-size:11px;line-height:1.6;border-top:1px solid #e6edf5}
+.maker-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:13px}
+@media(max-width:700px){.maker-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.maker-stat{background:#f8fafc;border:1px solid #e1e8f0;padding:12px;border-radius:14px;min-width:0}
+.maker-stat small{display:block;color:#68778c;font-size:11px;font-weight:800}
+.maker-stat strong{display:block;font-size:21px;margin-top:6px;overflow-wrap:anywhere}
+.maker-stat .unit{font-size:11px}
+.maker-stat.highlight{background:linear-gradient(135deg,#eef4ff,#effcf9);border-color:#d3e2f5}
+.maker-charts{display:grid;grid-template-columns:1fr;gap:12px;margin-top:15px}
+.maker-chartbox{border:1px solid var(--line);border-radius:16px;background:#fff;padding:10px 12px;min-width:0}
+.maker-chart-title{font-size:12px;font-weight:900;margin:2px 0 7px;color:#34465c}
+svg.maker-chart{display:block;width:100%;height:auto;min-height:190px}
+.maker-legend{display:flex;flex-wrap:wrap;gap:13px;font-size:11px;color:#66758a;padding:5px 2px 0}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:99px;margin-right:5px}
+.maker-action-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.maker-action-row button{font-size:12px}
+.maker-warning{font-size:12px;color:#66758a;margin-top:8px;line-height:1.55}
+.drop-hint{border:1px dashed #a9bdd7;border-radius:12px;padding:11px;color:#6a7a90;font-size:11px;line-height:1.5;margin-top:10px;background:#f7faff}
+.drop-hint.drag-hot{border-color:#315efb;background:#eaf1ff;color:#244ab4}
+.maker-table{min-width:900px}
+.maker-table td,.maker-table th{font-variant-numeric:tabular-nums}
+.maker-footnote{font-size:12px;color:#68778c;line-height:1.65;margin-top:12px}
+@media(max-width:480px){.maker-section.card{padding:14px}.part-grid{gap:6px}.part-btn{padding:8px;min-height:85px}.maker-stat strong{font-size:18px}}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">GEOMETRY × PHYSICS × DATA</div>
+  <h1>🎢 Cycloid Roller Coaster Lab</h1>
+  <p class="hero-sub">
+    곡선 자체를 눈으로 확인하고, 열차가 실제로 그 위를 내려가면서
+    <b>높이 → 속력 → 에너지 → 주행시간</b>이 어떻게 바뀌는지 한 화면에서 이해하는 탐구용 시뮬레이션.
+    <br><b>같은 출발점·도착점에서 곡선을 공정하게 비교</b>하도록 설계했어.
+  </p>
+  <div class="badges">
+    <span class="badge">15개정 Math II 수준 중심</span>
+    <span class="badge">이상적·마찰 없음</span>
+    <span class="badge">실시간 데이터 생성</span>
+    <a class="badge quick-link" href="#builderSection">🧩 자유 설계 + 자가 발전 모드 ↓</a>
+  </div>
+</header>
+
+<main>
+<section class="card">
+  <h2>① 실험 조건</h2>
+  <p class="desc">최고점에서 정지한 열차가 출발해 아래로 내려온다고 가정해. 반지름과 질량을 바꾸면 물리량이 어떻게 달라지는지도 확인할 수 있어.</p>
+  <div style="margin:13px 0;padding:13px 15px;border-radius:14px;background:#f8fafc;border:1px solid #dce5ef;line-height:1.65;font-size:13px;color:#526274">
+    <b>공정한 비교 조건:</b> 네 곡선 모두 같은 출발점 <b>(0, 2r)</b>과 도착점 <b>(πr, 0)</b>을 지나며,
+    같은 위치에너지 조건에서 <b>정지 출발 · 마찰 없음</b>으로 비교해.
+  </div>
+  <div class="controls">
+    <div><label>곡선 선택</label>
+      <select id="curve">
+        <option value="cycloid">사이클로이드</option>
+        <option value="parabola">포물선</option>
+        <option value="circle">원호</option>
+        <option value="line">직선</option>
+      </select>
+    </div>
+    <div><label>반지름 r (m)</label><input id="r" type="number" min="0.2" step="0.1" value="1"></div>
+    <div><label>질량 m (kg)</label><input id="m" type="number" min="0.1" step="0.1" value="1"></div>
+    <div><label>중력가속도 g (m/s²)</label><input id="g" type="number" min="0.1" step="0.1" value="9.8"></div>
+  </div>
+  <div class="buttons">
+    <button class="primary" id="play">▶ 선택한 곡선 출발</button>
+    <button class="primary" id="dualPlay">▶▶ 사이클로이드 + 포물선 동시 주행</button>
+    <button class="ghost" id="pause">Ⅱ 일시정지</button>
+    <button class="ghost" id="reset">↺ 처음으로</button>
+  </div>
+</section>
+
+<section class="card stage-card">
+  <div class="stage-top">
+    <div>
+      <h2>② 롤러코스터 실제 주행</h2>
+      <div class="desc">열차가 최고점에서 출발해 곡선을 따라 내려간다. 특히 <b>동시 주행</b>에서는 🔵 사이클로이드와 🔴 포물선을 동시에 출발시켜 도착 시점을 직접 비교할 수 있다.</div>
+    </div>
+    <div class="live" id="live">대기 중 · 최고점에서 정지</div>
+  </div>
+  <div class="stage">
+    <svg id="scene" viewBox="0 0 1000 510" role="img" aria-label="롤러코스터 시뮬레이션">
+      <rect x="0" y="0" width="1000" height="310" fill="#dcecff"/>
+      <rect x="0" y="310" width="1000" height="200" fill="#e9f7ec"/>
+      <circle class="sun" cx="875" cy="85" r="38"/>
+      <g class="cloud">
+        <circle cx="155" cy="85" r="25"/><circle cx="185" cy="76" r="34"/><circle cx="225" cy="89" r="24"/>
+        <rect x="145" y="85" width="94" height="28" rx="14"/>
+      </g>
+      <g id="ground">
+        <path class="water" d="M0 430 Q120 380 240 432 T480 430 T720 432 T1000 430 L1000 510 L0 510Z"/>
+        <path class="land" d="M0 355 Q125 310 250 360 T500 355 T750 360 T1000 350 L1000 510 L0 510Z"/>
+      </g>
+      <g id="supports"></g>
+      <path id="trackGlow" class="track-glow"/>
+      <path id="track" class="track"/>
+      <path id="cycloidTrack" fill="none" stroke="#315efb" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <path id="parabolaTrack" fill="none" stroke="#ef4444" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <g id="labels"></g>
+
+      <g id="trainGroup">
+        <rect class="train" x="-25" y="-20" width="50" height="27" rx="8"/>
+        <rect class="seat" x="-17" y="-16" width="10" height="8" rx="2"/>
+        <rect class="seat" x="-2" y="-16" width="10" height="8" rx="2"/>
+        <circle class="wheel" cx="-14" cy="10" r="6"/>
+        <circle class="wheel" cx="14" cy="10" r="6"/>
+      </g>
+
+      <g id="dualCycloidTrain" opacity="0">
+        <rect x="-25" y="-20" width="50" height="27" rx="8" fill="#315efb" stroke="#183da8" stroke-width="2"/>
+        <rect x="-17" y="-16" width="10" height="8" rx="2" fill="#fff"/>
+        <rect x="-2" y="-16" width="10" height="8" rx="2" fill="#fff"/>
+        <circle cx="-14" cy="10" r="6" fill="#111827"/><circle cx="14" cy="10" r="6" fill="#111827"/>
+      </g>
+
+      <g id="dualParabolaTrain" opacity="0">
+        <rect x="-25" y="-20" width="50" height="27" rx="8" fill="#ef4444" stroke="#9f1d1d" stroke-width="2"/>
+        <rect x="-17" y="-16" width="10" height="8" rx="2" fill="#fff"/>
+        <rect x="-2" y="-16" width="10" height="8" rx="2" fill="#fff"/>
+        <circle cx="-14" cy="10" r="6" fill="#111827"/><circle cx="14" cy="10" r="6" fill="#111827"/>
+      </g>
+    </svg>
+    <div class="stage-caption">단일 주행: 현재 선택 곡선의 열차 · 동시 주행: 🔵 사이클로이드 / 🔴 포물선이 같은 순간에 함께 출발해 각각의 실제 속도로 달린다.</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>③ 열차의 현재 상태</h2>
+  <div class="stats">
+    <div class="stat"><small>높이 y</small><strong id="yVal">2.000</strong><span class="unit">m</span></div>
+    <div class="stat"><small>속력 v</small><strong id="vVal">0.000</strong><span class="unit">m/s</span></div>
+    <div class="stat"><small>위치에너지 PE</small><strong id="peVal">19.600</strong><span class="unit">J</span></div>
+    <div class="stat"><small>운동에너지 KE</small><strong id="keVal">0.000</strong><span class="unit">J</span></div>
+    <div class="stat"><small>전체 에너지</small><strong id="eVal">19.600</strong><span class="unit">J</span></div>
+    <div class="stat time-stat"><small>예상 총 주행 시간</small><strong id="timeVal">-</strong><span class="unit">s</span></div>
+    <div class="stat"><small>누적 이동거리</small><strong id="distVal">0.000</strong><span class="unit">m</span></div>
+  </div>
+</section>
+
+<section class="card" id="dualStatusCard">
+  <h2>④ 동시 주행 실시간 비교</h2>
+  <p class="desc">동시 주행 버튼을 누르면 🔵 사이클로이드와 🔴 포물선 열차가 <b>같은 순간에 출발</b>한다. 두 곡선의 실제 주행시간을 따로 계산해 각 열차의 물리적 시간 흐름에 맞춰 움직이고, 먼저 도착한 열차를 표시한다.</p>
+  <div class="stats">
+    <div class="stat"><small>🔵 사이클로이드 경과 시간</small><strong id="dualCycloidTime">0.000</strong><span class="unit">s</span></div>
+    <div class="stat"><small>🔵 사이클로이드 현재 속력</small><strong id="dualCycloidSpeed">0.000</strong><span class="unit">m/s</span></div>
+    <div class="stat"><small>🔴 포물선 경과 시간</small><strong id="dualParabolaTime">0.000</strong><span class="unit">s</span></div>
+    <div class="stat"><small>🔴 포물선 현재 속력</small><strong id="dualParabolaSpeed">0.000</strong><span class="unit">m/s</span></div>
+    <div class="stat time-stat"><small>도착 비교</small><strong id="dualWinner">대기</strong><span class="unit">동시 주행 전</span></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>⑤ 핵심 수식 — 깨지지 않게 수학식으로 표시</h2>
+  <div class="formula">
+    <div class="formula-title">CYCLOID</div>
+    <math display="block">
+      <mrow>
+        <mi>x</mi><mo>=</mo><mi>r</mi><mo stretchy="false">(</mo><mi>θ</mi><mo>−</mo><mi>sin</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">))</mo>
+        <mspace width="1.4em"/>
+        <mi>y</mi><mo>=</mo><mi>r</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>cos</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">))</mo>
+      </mrow>
+    </math>
+  </div>
+  <div class="formula">
+    <div class="formula-title">ENERGY CONSERVATION</div>
+    <math display="block">
+      <mrow>
+        <mi>mgy</mi><mo>+</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mi>m</mi><msup><mi>v</mi><mn>2</mn></msup>
+        <mo>=</mo><mn>2</mn><mi>mgr</mi>
+      </mrow>
+    </math>
+  </div>
+  <div class="formula">
+    <div class="formula-title">SPEED</div>
+    <math display="block">
+      <mrow>
+        <mi>v</mi><mo>=</mo><msqrt><mrow><mn>2</mn><mi>g</mi><mo stretchy="false">(</mo><mn>2</mn><mi>r</mi><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></msqrt>
+      </mrow>
+    </math>
+  </div>
+  <div class="explain">
+    사이클로이드의 최고점은 <b>θ = π</b>이고 이때 <b>y = 2r</b>야. 여기서 정지 출발하면 내려가면서 위치에너지가 운동에너지로 바뀌어.
+    중요한 점은 <b>속력은 현재 높이에 의해 결정되고, 질량은 계산 과정에서 소거된다</b>는 거야.
+  </div>
+  <div class="formula">
+    <div class="formula-title">NUMERICAL TRAVEL TIME</div>
+    <math display="block">
+      <mrow>
+        <mi>Δt</mi><mo>≈</mo><mfrac><mi>Δs</mi><mrow><msup><mi>v</mi><mo>¯</mo></msup></mrow></mfrac>
+        <mo>,</mo>
+        <mrow><msup><mi>v</mi><mo>¯</mo></msup><mo>=</mo><mfrac><mrow><msub><mi>v</mi><mn>i</mn></msub><mo>+</mo><msub><mi>v</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><mn>2</mn></mfrac></mrow>
+      </mrow>
+    </math>
+  </div>
+  <div class="explain">
+    모든 곡선은 <b>같은 출발점과 같은 도착점</b>을 공유하도록 만들었어.
+주행 시간은 곡선을 아주 작은 구간으로 나누어
+<b>각 구간의 거리 ÷ 평균 속력</b>을 더하는 방식으로 계산해.
+특히 사이클로이드는 브라키스토크론의 정확한 시간식
+<b>T = π√(r/g)</b>도 함께 사용해 수치 오차를 보정했어.
+  </div>
+</section>
+
+<section class="card">
+  <h2>⑤ 걸리는 시간 비교</h2>
+  <div class="grid2">
+    <div class="chartbox">
+      <div class="chart-title">현재 곡선의 구간별 누적 시간</div>
+      <svg id="timeChart" class="chart" viewBox="0 0 720 280"></svg>
+    </div>
+    <div class="formula">
+      <div class="formula-title">INTERPRETATION</div>
+      <div class="explain" style="margin-top:0">
+        열차가 같은 출발 높이에서 내려와도 곡선에 따라
+        <b>높이가 감소하는 방식 → 속력이 증가하는 방식 → 이동에 걸리는 시간</b>이 달라질 수 있어.
+        그래서 이번 탐구에서 “곡선의 모양”을 단순히 예쁘게 보는 데서 끝내지 않고
+        <b>데이터로 비교</b>할 수 있어.
+      </div>
+      <div style="margin-top:14px;padding:14px;background:#f7f9fc;border-radius:14px;line-height:1.7;font-size:14px">
+        <b>현재 선택:</b> <span id="timeCurveName">사이클로이드</span><br>
+        <b>예상 총 시간:</b> <span id="timeBig">-</span> s<br>
+        <b>총 이동거리:</b> <span id="distanceBig">-</span> m<br>
+        <b>기준 사이클로이드 시간:</b> <span id="timeResult">-</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>⑤ 곡선 4개의 속력을 한눈에 비교</h2>
+  <p class="desc">
+    여기서 중요한 점: <b>같은 높이에 있으면 속력은 같다.</b>
+    하지만 같은 진행률이나 같은 x 위치에서는 곡선마다 높이가 달라질 수 있으므로 속력도 달라진다.
+    아래 그래프는 네 곡선을 같은 출발점·도착점 조건에서 동시에 비교한다.
+  </p>
+
+  <div class="chartbox">
+    <div class="chart-title">진행률에 따른 높이</div>
+    <svg id="compareHeightChart" class="chart" viewBox="0 0 900 320"></svg>
+  </div>
+  <div style="height:14px"></div>
+  <div class="chartbox">
+    <div class="chart-title">진행률에 따른 속력 — 이제 서로 같은지 직접 확인</div>
+    <svg id="compareSpeedChart" class="chart" viewBox="0 0 900 320"></svg>
+  </div>
+
+  <div style="height:14px"></div>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>진행률</th>
+          <th>사이클로이드 y</th>
+          <th>사이클로이드 v</th>
+          <th>포물선 y</th>
+          <th>포물선 v</th>
+          <th>직선 y</th>
+          <th>직선 v</th>
+        </tr>
+      </thead>
+      <tbody id="compareBody"></tbody>
+    </table>
+  </div>
+
+  <div class="insight" style="margin-top:14px">
+    <div><b>같은 높이</b>예를 들어 모든 곡선에서 y=1 m인 지점을 찾으면 속력은 모두
+      <span id="sameHeightSpeed">-</span> m/s로 같아진다.</div>
+    <div><b>같은 진행률</b>진행률 50%에서는 곡선마다 높이가 달라서 속력도 달라진다.
+      <span id="midSpeedCompare">-</span></div>
+    <div><b>핵심</b>“사이클로이드가 항상 순간속력이 가장 크다”가 아니라,
+      <b>전체 주행시간</b>이 가장 작다는 것이 브라키스토크론의 핵심이다.</div>
+  </div>
+  <div style="height:14px"></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>곡선</th><th>총 주행 시간 (s)</th><th>총 이동거리 (m)</th></tr></thead>
+      <tbody id="timeCompareBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>⑧ 시간을 기준으로 다시 비교하기</h2>
+  <p class="desc">
+    앞의 그래프는 <b>같은 진행률에서의 순간 속력</b>을 비교한 것이어서 포물선이 더 빠르게 보이는 구간이 있어.
+    진짜 “누가 먼저 도착하는가?”를 보려면 <b>같은 시간에 얼마나 진행했는지</b>를 비교해야 해.
+  </p>
+
+  <div class="chartbox">
+    <div class="chart-title">시간에 따른 진행률 — 같은 순간에 누가 더 앞에 있는가?</div>
+    <svg id="timeProgressChart" class="chart" viewBox="0 0 900 330"></svg>
+  </div>
+
+  <div style="height:14px"></div>
+  <div class="chartbox">
+    <div class="chart-title">시간에 따른 높이 — 같은 순간에 어느 열차가 더 낮아졌는가?</div>
+    <svg id="timeHeightChart" class="chart" viewBox="0 0 900 330"></svg>
+  </div>
+
+  <div class="formula">
+    <div class="formula-title">핵심 비교</div>
+    <div class="explain" style="margin-top:0">
+      순간 속력 그래프의 질문은 <b>“같은 진행률에서 얼마나 빠른가?”</b>이고,
+      이 그래프의 질문은 <b>“같은 시간이 지났을 때 어디까지 갔는가?”</b>야.
+      후자가 실제 <b>도착시간</b>을 비교하는 데 직접적으로 연결돼.
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><small>🔵 사이클로이드 도착</small><strong id="timeCompareCycloid">-</strong><span class="unit">s</span></div>
+    <div class="stat"><small>🔴 포물선 도착</small><strong id="timeCompareParabola">-</strong><span class="unit">s</span></div>
+    <div class="stat time-stat"><small>도착 차이</small><strong id="timeCompareGap">-</strong><span class="unit">s</span></div>
+  </div>
+
+  <div class="insight" style="margin-top:14px">
+    <div><b>순간 속력</b>같은 진행률에서는 포물선이 더 빠른 구간이 있다.</div>
+    <div><b>같은 시간</b>하지만 같은 시각에 출발한 두 열차를 비교하면 진행 정도가 달라진다.</div>
+    <div><b>최종 결과</b>동일한 출발점·도착점 조건에서 전체 주행시간을 비교해야 브라키스토크론의 의미를 판단할 수 있다.</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>⑧ 선택한 곡선의 높이와 속력</h2>
+  <div class="grid2">
+    <div class="chartbox">
+      <div class="chart-title">높이 y — 아래로 내려갈수록 감소</div>
+      <svg id="heightChart" class="chart" viewBox="0 0 720 280"></svg>
+    </div>
+    <div class="chartbox">
+      <div class="chart-title">속력 v — 높이가 낮아질수록 증가</div>
+      <svg id="speedChart" class="chart" viewBox="0 0 720 280"></svg>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>⑩ 위치에너지와 운동에너지</h2>
+  <div class="chartbox">
+    <svg id="energyChart" class="chart" viewBox="0 0 900 300"></svg>
+  </div>
+  <p class="desc">이상적인 경우 PE가 줄어든 만큼 KE가 늘어나기 때문에 <b>PE + KE = 일정</b>하게 나타난다.</p>
+</section>
+
+<section class="card">
+  <h2>⑪ 실제 계산 데이터</h2>
+  <p class="desc">표는 <b>진행률 0%부터 100%까지 1% 간격</b>으로 표시돼. 내부 계산은 4001개의 샘플을 사용해서 주행시간과 속력을 더 촘촘하게 근사해.</p>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>진행률</th><th>θ</th><th>x (m)</th><th>y (m)</th><th>v (m/s)</th><th>PE (J)</th><th>KE (J)</th><th>전체 E (J)</th>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>⑫ 이 시뮬레이션에서 봐야 하는 것</h2>
+  <div class="insight">
+    <div><b>① 기하</b>곡선을 식으로 나타내고 θ에 따른 x, y 데이터를 만든다.</div>
+    <div><b>② 물리</b>높이를 이용해 역학적 에너지 보존으로 현재 속력을 계산한다.</div>
+    <div><b>③ 데이터</b>열차의 위치가 바뀔 때 높이·속력·PE·KE·주행시간이 어떻게 함께 변하는지 그래프로 분석한다.</div>
+    <div><b>④ 비교</b>순간 속력이 항상 가장 큰 것이 아니라, 같은 출발점·도착점에서 <b>전체 주행시간</b>이 어떻게 달라지는지를 비교해야 한다.</div>
+  </div>
+</section>
+
+
+<section class="card maker-section" id="builderSection">
+  <div class="maker-intro">
+    <div>
+      <div class="maker-kicker">LEGO TRACK BUILDER × ENERGY RECOVERY</div>
+      <h2 style="margin:5px 0 7px;font-size:24px">⑬ 나만의 롤러코스터 설계소</h2>
+      <p class="desc" style="margin:0;max-width:780px">레고처럼 트랙 부품을 조립하고, 열차를 출발시켜 봐. 발전 구간·회생 제동·전동 추진을 배치하면 에너지 이동도 계산해. 기존 곡선 비교 실험은 위에 그대로 있어!</p>
+    </div>
+    <span class="maker-pill">⚙️ 연결 자동 구성 · 🧲 발전 · 💥 파손 판정</span>
+  </div>
+
+  <div class="maker-callout">
+    <b>조립 방법:</b> 왼쪽 부품을 누르면 트랙 끝에 추가돼. 조립 목록에서 ▲▼로 순서를 바꾸거나 항목을 드래그해 재배치할 수도 있어. 부품을 선택하면 길이와 높이 변화를 수정할 수 있어.<br>
+    <b>물리 모델:</b> 중력에 따른 에너지 변화, 마찰 손실, 발전 회수, 배터리 저장·소비를 단계별로 계산해. 급격한 곡률이나 루프 꼭대기의 속력 부족은 실패 판정이 될 수 있어. 게임 내 과부하 기준은 7.5 g이며 교육용 모델일 뿐 실제 놀이기구 안전 인증을 대신하지 않아.
+  </div>
+
+  <div class="maker-controls">
+    <div><label for="makerStartHeight">출발 높이 (m)</label><input id="makerStartHeight" type="number" min="1" max="40" step="0.5" value="18"></div>
+    <div><label for="makerMass">열차 질량 (kg)</label><input id="makerMass" type="number" min="10" max="2000" step="10" value="250"></div>
+    <div><label for="makerGravity">중력가속도 (m/s²)</label><input id="makerGravity" type="number" min="1" max="20" step="0.1" value="9.8"></div>
+    <div><label for="makerStartSpeed">초기 속력 (m/s)</label><input id="makerStartSpeed" type="number" min="0" max="10" step="0.1" value="0.4"></div>
+    <div><label for="makerEfficiency">발전 효율 (%)</label><input id="makerEfficiency" type="number" min="10" max="100" step="5" value="75"></div>
+    <div><label for="makerBatteryCap">배터리 용량 (kJ)</label><input id="makerBatteryCap" type="number" min="1" max="500" step="5" value="60"></div>
+    <div><label for="makerInitialBattery">초기 배터리 (kJ)</label><input id="makerInitialBattery" type="number" min="0" max="500" step="1" value="0"></div>
+    <div><label for="makerFriction">마찰 계수 (%)</label><input id="makerFriction" type="number" min="0" max="8" step="0.1" value="0.8"></div>
+    <div><label for="makerPlayRate">재생 속도</label><select id="makerPlayRate"><option value="1">1× 보통</option><option value="1.5" selected>1.5× 빠르게</option><option value="2.5">2.5× 매우 빠르게</option></select></div>
+    <div><label for="makerPreset">빠른 설계 예시</label><select id="makerPreset"><option value="custom">현재 설계 유지</option><option value="starter">기본 완주 + 발전</option><option value="loopRisk">작은 루프 도전</option><option value="eco">발전량 중심</option></select></div>
+  </div>
+
+  <div class="maker-action-row">
+    <button class="primary" id="makerRun">▶ 열차 출발</button>
+    <button class="ghost" id="makerPause">Ⅱ 일시 정지</button>
+    <button class="ghost" id="makerReset">↺ 처음으로</button>
+    <button class="ghost" id="makerDefault">🧩 기본 설계 불러오기</button>
+    <button class="ghost" id="makerClear">🧹 트랙 비우기</button>
+    <button class="ghost" id="makerExport">⬇ 실제 계산 데이터 CSV</button>
+  </div>
+
+  <div class="maker-layout" style="margin-top:16px">
+    <div class="maker-side">
+      <div class="maker-subcard">
+        <h3>🧱 부품 창고</h3>
+        <div class="part-grid" id="makerPalette">
+          <button class="part-btn" data-type="straight" draggable="true"><span class="part-icon">━</span><strong>직선 구간</strong><small>수평으로 연결</small></button>
+          <button class="part-btn" data-type="downhill" draggable="true"><span class="part-icon">↘️</span><strong>내리막</strong><small>위치 에너지 → 운동 에너지</small></button>
+          <button class="part-btn" data-type="cycloid" draggable="true"><span class="part-icon">〽️</span><strong>사이클로이드형</strong><small>부드러운 곡선 하강</small></button>
+          <button class="part-btn" data-type="uphill" draggable="true"><span class="part-icon">↗️</span><strong>오르막</strong><small>높이 증가 · 에너지 소모</small></button>
+          <button class="part-btn" data-type="arc" draggable="true"><span class="part-icon">⌒</span><strong>원호 구간</strong><small>둥근 곡선 구간</small></button>
+          <button class="part-btn" data-type="hill" draggable="true"><span class="part-icon">⛰️</span><strong>언덕</strong><small>올라갔다 내려오기</small></button>
+          <button class="part-btn" data-type="valley" draggable="true"><span class="part-icon">⌣</span><strong>골짜기</strong><small>아래로 휘어지는 구간</small></button>
+          <button class="part-btn" data-type="loop" draggable="true"><span class="part-icon">⭕</span><strong>원형 루프</strong><small>속력·곡률 검사</small></button>
+          <button class="part-btn" data-type="generator" draggable="true"><span class="part-icon">⚡</span><strong>발전 구간</strong><small>운동 에너지 일부 회수</small></button>
+          <button class="part-btn" data-type="regenBrake" draggable="true"><span class="part-icon">🧲</span><strong>회생 제동</strong><small>감속하면서 전기 저장</small></button>
+          <button class="part-btn" data-type="motor" draggable="true"><span class="part-icon">🚀</span><strong>전동 추진</strong><small>배터리로 열차 가속</small></button>
+          <button class="part-btn" data-type="brake" draggable="true"><span class="part-icon">🛑</span><strong>일반 제동</strong><small>운동 에너지를 열로 소산</small></button>
+        </div>
+        <div class="drop-hint" id="makerDropHint">부품을 누르거나 오른쪽 트랙 미리보기로 드래그해 추가할 수 있어. 조립 순서는 아래 목록에서 바꿔 봐!</div>
+      </div>
+
+      <div class="maker-subcard">
+        <h3>🧩 조립된 트랙 <span id="makerPartCount" style="color:#728198;font-size:11px">0개</span></h3>
+        <div class="piece-list" id="makerPieceList"></div>
+        <div class="maker-edit-grid">
+          <div><label for="makerPieceWidth">구간 길이 / 루프 지름 (m)</label><input id="makerPieceWidth" type="number" min="0.5" max="15" step="0.1" value="4"></div>
+          <div><label for="makerPieceDelta">끝 높이 변화 (m)</label><input id="makerPieceDelta" type="number" min="-12" max="12" step="0.2" value="0"></div>
+          <div><label for="makerPieceAmp">곡선 높이 조정 (m)</label><input id="makerPieceAmp" type="number" min="-6" max="6" step="0.2" value="0"></div>
+        </div>
+        <div class="maker-warning" id="makerPieceHelp">목록에서 부품을 선택하면 세부 값을 수정할 수 있어.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="maker-stage">
+        <div class="maker-stage-top">
+          <div><h3>🚃 설계 미리보기 & 실제 주행</h3><div class="desc" style="font-size:12px">색이 다른 구간은 서로 다른 부품이야. ⚡은 발전, 🧲은 회생 제동, 🚀은 배터리 추진 구간.</div></div>
+          <span class="maker-status" id="makerStatus">설계 대기 중</span>
+        </div>
+        <svg id="makerScene" viewBox="0 0 1000 410" role="img" aria-label="레고식 롤러코스터 트랙 설계 및 주행 시뮬레이션">
+          <defs>
+            <linearGradient id="makerSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#dcecff"/><stop offset="100%" stop-color="#f7fbff"/></linearGradient>
+            <linearGradient id="makerGroundGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d9f0dd"/><stop offset="100%" stop-color="#b9dfbe"/></linearGradient>
+          </defs>
+          <rect width="1000" height="410" fill="url(#makerSky)"/>
+          <circle cx="895" cy="54" r="26" fill="#ffd76b"/>
+          <g fill="#fff" opacity=".85"><ellipse cx="160" cy="62" rx="42" ry="17"/><ellipse cx="185" cy="54" rx="28" ry="20"/><ellipse cx="210" cy="64" rx="35" ry="15"/></g>
+          <rect id="makerGround" x="0" y="320" width="1000" height="90" fill="url(#makerGroundGradient)"/>
+          <path id="makerGroundLine" d="M0 320 H1000" stroke="#8ab994" stroke-width="2" stroke-dasharray="8 6"/>
+          <g id="makerSupports"></g>
+          <g id="makerPieces"></g>
+          <g id="makerPartMarkers"></g>
+          <g id="makerFailureMark" opacity="0"></g>
+          <g id="makerTrain" transform="translate(40 100)">
+            <rect x="-23" y="-18" width="46" height="24" rx="7" fill="#ef4444" stroke="#8e1b1b" stroke-width="2"/>
+            <rect x="-15" y="-14" width="9" height="7" rx="2" fill="#fff"/><rect x="-1" y="-14" width="9" height="7" rx="2" fill="#fff"/>
+            <circle cx="-13" cy="9" r="5.5" fill="#111827"/><circle cx="13" cy="9" r="5.5" fill="#111827"/>
+          </g>
+          <g id="makerTrainGhost" opacity="0"></g>
+        </svg>
+        <div class="maker-caption">속력은 위치에너지 변화·초기 속력·마찰·발전 및 추진 장치를 반영해 계산해. 루프는 트랙 지점을 지나 한 바퀴를 돌아 같은 접점으로 복귀하는 구조로 모델링돼.</div>
+      </div>
+
+      <div class="maker-metrics">
+        <div class="maker-stat"><small>현재 속력</small><strong id="makerSpeed">0.00</strong><span class="unit">m/s</span></div>
+        <div class="maker-stat"><small>현재 높이</small><strong id="makerHeight">18.00</strong><span class="unit">m</span></div>
+        <div class="maker-stat"><small>운동 에너지</small><strong id="makerKE">0.00</strong><span class="unit">kJ</span></div>
+        <div class="maker-stat"><small>위치 에너지</small><strong id="makerPE">44.10</strong><span class="unit">kJ</span></div>
+        <div class="maker-stat"><small>현재 발전 전력</small><strong id="makerPower">0.00</strong><span class="unit">W</span></div>
+        <div class="maker-stat"><small>누적 생산 전기</small><strong id="makerGenerated">0.00</strong><span class="unit">kJ</span></div>
+        <div class="maker-stat highlight"><small>배터리 잔량</small><strong id="makerBattery">0.00</strong><span class="unit">kJ</span></div>
+        <div class="maker-stat"><small>현재 구심가속도</small><strong id="makerGLoad">0.00</strong><span class="unit">g</span></div>
+        <div class="maker-stat"><small>역학적 에너지</small><strong id="makerMechanical">44.10</strong><span class="unit">kJ</span></div>
+        <div class="maker-stat"><small>전동기 소비 전기</small><strong id="makerMotorUse">0.00</strong><span class="unit">kJ</span></div>
+        <div class="maker-stat"><small>경과 시간</small><strong id="makerElapsed">0.00</strong><span class="unit">s</span></div>
+        <div class="maker-stat"><small>예상 주행 시간</small><strong id="makerTotalTime">—</strong><span class="unit">s</span></div>
+      </div>
+
+      <div class="maker-charts">
+        <div class="maker-chartbox">
+          <div class="maker-chart-title">에너지 변화 — 위치·운동·배터리 에너지</div>
+          <svg id="makerEnergyChart" class="maker-chart" viewBox="0 0 900 230" role="img" aria-label="시간에 따른 에너지 그래프"></svg>
+          <div class="maker-legend"><span><i class="legend-dot" style="background:#315efb"></i>위치 에너지</span><span><i class="legend-dot" style="background:#ef4444"></i>운동 에너지</span><span><i class="legend-dot" style="background:#0d9488"></i>배터리 에너지</span><span><i class="legend-dot" style="background:#64748b"></i>역학적 에너지</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maker-subcard" style="margin-top:16px">
+    <h3>📋 설계 결과 요약</h3>
+    <div class="insight" style="margin:0">
+      <div><b>트랙 구조</b><span id="makerSummaryParts">아직 부품이 없어.</span></div>
+      <div><b>에너지 회수</b><span id="makerSummaryEnergy">발전 장치를 지나야 전기가 생산돼.</span></div>
+      <div><b>실패 원인</b><span id="makerSummaryFailure">출발 전 설계를 계산해 확인해 봐.</span></div>
+    </div>
+    <div class="tablewrap" style="margin-top:13px">
+      <table class="maker-table">
+        <thead><tr><th>시간 (s)</th><th>거리 (m)</th><th>구간</th><th>높이 (m)</th><th>속력 (m/s)</th><th>PE (kJ)</th><th>KE (kJ)</th><th>배터리 (kJ)</th><th>누적 발전 (kJ)</th><th>구심가속도 (g)</th></tr></thead>
+        <tbody id="makerDataBody"></tbody>
+      </table>
+    </div>
+    <p class="maker-footnote">이 설계 모드는 탐구용 단순화 모델이야. 트랙의 곡선·에너지·발전량은 계산 가능한 근사치이며, 실제 롤러코스터의 구조 강도·열차 접촉력·승객 안전성을 검증하는 공학 해석은 아니야. CSV 내보내기로 계산 데이터를 받아 추가 분석할 수 있어.</p>
+  </div>
+</section>
+
+<div class="footer">Cycloid Roller Coaster Lab · Geometry × Physics × Data</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let samples=[], pos=0, playing=false, lastTime=0, timer=0;
+
+function vals(){
+  const r=Math.max(.2,+$('r').value||1);
+  const m=Math.max(.1,+$('m').value||1);
+  const g=Math.max(.1,+$('g').value||9.8);
+  return {r,m,g};
+}
+
+function model(u){
+  const {r}=vals();
+  const H=2*r;
+  const X=Math.PI*r;
+  const curve=$('curve').value;
+
+  let x=X*u, y, theta=null;
+
+  if(curve==='cycloid'){
+    // 기준 사이클로이드: (0,2r)에서 (πr,0)까지 내려가는 형태
+    theta=Math.PI*u;
+    x=r*(theta-Math.sin(theta));
+    y=H-r*(1-Math.cos(theta));
+  }else if(curve==='parabola'){
+    // 같은 출발점과 도착점을 지나는 포물선
+    y=H*Math.pow(1-u,2);
+  }else if(curve==='circle'){
+    // 단순 원호 비교는 출발·도착 높이 조건을 깨뜨릴 수 있으므로,
+    // 사이트의 메인 공정 비교에서는 참고용 곡선으로 유지한다.
+    y=H*(1-u)+0.24*H*Math.sin(Math.PI*u);
+  }else{
+    // 같은 두 점을 잇는 직선
+    y=H*(1-u);
+  }
+  return {x,y,theta};
+}
+
+
+function comparePoint(curve,u){
+  const {r}=vals();
+  const H=2*r;
+  const X=Math.PI*r;
+  if(curve==='cycloid'){
+    const theta=Math.PI*u;
+    return {x:r*(theta-Math.sin(theta)), y:H-r*(1-Math.cos(theta)), theta};
+  }
+  if(curve==='parabola'){
+    return {x:X*u, y:H*Math.pow(1-u,2)};
+  }
+  if(curve==='line'){
+    return {x:X*u, y:H*(1-u)};
+  }
+  // 참고용 원호형
+  return {x:X*u, y:H*(1-u)+0.24*H*Math.sin(Math.PI*u)};
+}
+
+function speedFromY(y){
+  const {r,g}=vals();
+  return Math.sqrt(Math.max(0,2*g*(2*r-y)));
+}
+
+function drawMultiLineChart(svg, series, yLabel, colors){
+  svg.innerHTML='';
+  const W=900,H=320,L=60,R=20,T=24,B=50;
+  const iw=W-L-R, ih=H-T-B;
+  const all=series.flatMap(s=>s.values);
+  const ymax=Math.max(...all,1)*1.1;
+
+  for(let i=0;i<=5;i++){
+    const yy=T+ih*(1-i/5);
+    const gl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',L); gl.setAttribute('x2',W-R);
+    gl.setAttribute('y1',yy); gl.setAttribute('y2',yy);
+    gl.setAttribute('class','gridline'); svg.appendChild(gl);
+
+    const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tx.setAttribute('x',L-10); tx.setAttribute('y',yy+4);
+    tx.setAttribute('text-anchor','end'); tx.setAttribute('class','label');
+    tx.textContent=(ymax*i/5).toFixed(1); svg.appendChild(tx);
+  }
+
+  const ax=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ax.setAttribute('x1',L); ax.setAttribute('x2',L);
+  ax.setAttribute('y1',T); ax.setAttribute('y2',H-B);
+  ax.setAttribute('class','axis'); svg.appendChild(ax);
+
+  const ax2=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ax2.setAttribute('x1',L); ax2.setAttribute('x2',W-R);
+  ax2.setAttribute('y1',H-B); ax2.setAttribute('y2',H-B);
+  ax2.setAttribute('class','axis'); svg.appendChild(ax2);
+
+  const xlab=document.createElementNS('http://www.w3.org/2000/svg','text');
+  xlab.setAttribute('x',W/2); xlab.setAttribute('y',H-10);
+  xlab.setAttribute('text-anchor','middle'); xlab.setAttribute('class','label');
+  xlab.textContent='진행률 (%)'; svg.appendChild(xlab);
+
+  const ylab=document.createElementNS('http://www.w3.org/2000/svg','text');
+  ylab.setAttribute('x',12); ylab.setAttribute('y',22);
+  ylab.setAttribute('class','label'); ylab.textContent=yLabel; svg.appendChild(ylab);
+
+  series.forEach((s,j)=>{
+    const path=s.values.map((v,i)=>{
+      const x=L+iw*(i/(s.values.length-1));
+      const y=T+ih*(1-v/ymax);
+      return `${i?'L':'M'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    }).join(' ');
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',path); p.setAttribute('fill','none');
+    p.setAttribute('stroke',colors[j]); p.setAttribute('stroke-width','4');
+    p.setAttribute('stroke-linecap','round'); p.setAttribute('stroke-linejoin','round');
+    svg.appendChild(p);
+
+    const lx=L+10+j*180;
+    const leg=document.createElementNS('http://www.w3.org/2000/svg','line');
+    leg.setAttribute('x1',lx);leg.setAttribute('x2',lx+24);
+    leg.setAttribute('y1',H-28);leg.setAttribute('y2',H-28);
+    leg.setAttribute('stroke',colors[j]);leg.setAttribute('stroke-width','4');
+    leg.setAttribute('stroke-linecap','round');svg.appendChild(leg);
+
+    const lt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lt.setAttribute('x',lx+31);lt.setAttribute('y',H-24);
+    lt.setAttribute('class','label');lt.textContent=s.name;svg.appendChild(lt);
+  });
+}
+
+function renderComparison(){
+  const N=201;
+  const curves=['cycloid','parabola','line'];
+  const names=['사이클로이드','포물선','직선'];
+  const colors=['#315efb','#ef4444','#14a77a'];
+
+  const heightSeries=curves.map((c,j)=>({
+    name:names[j],
+    values:Array.from({length:N},(_,i)=>comparePoint(c,i/(N-1)).y)
+  }));
+  const speedSeries=curves.map((c,j)=>({
+    name:names[j],
+    values:Array.from({length:N},(_,i)=>speedFromY(comparePoint(c,i/(N-1)).y))
+  }));
+
+  drawMultiLineChart($('compareHeightChart'),heightSeries,'높이 y (m)',colors);
+  drawMultiLineChart($('compareSpeedChart'),speedSeries,'속력 v (m/s)',colors);
+
+  const cb=$('compareBody'); cb.innerHTML='';
+  [0,25,50,75,100].forEach(pct=>{
+    const u=pct/100;
+    const rows=curves.map(c=>comparePoint(c,u));
+    const tr=document.createElement('tr');
+    const values=[
+      pct+'%',
+      rows[0].y.toFixed(3), speedFromY(rows[0].y).toFixed(3),
+      rows[1].y.toFixed(3), speedFromY(rows[1].y).toFixed(3),
+      rows[2].y.toFixed(3), speedFromY(rows[2].y).toFixed(3)
+    ];
+    values.forEach(v=>{
+      const td=document.createElement('td');td.textContent=v;tr.appendChild(td);
+    });
+    cb.appendChild(tr);
+  });
+
+  const {g,r}=vals();
+  const sameH=1*r;
+  $('sameHeightSpeed').textContent=speedFromY(sameH).toFixed(3);
+
+  const u=.5;
+  const cV=speedFromY(comparePoint('cycloid',u).y);
+  const pV=speedFromY(comparePoint('parabola',u).y);
+  const lV=speedFromY(comparePoint('line',u).y);
+  $('midSpeedCompare').textContent=
+    `50%에서 사이클로이드 ${cV.toFixed(2)} / 포물선 ${pV.toFixed(2)} / 직선 ${lV.toFixed(2)} m/s.`;
+
+  // 차이를 시각적으로 강조
+  $('midSpeedCompare').style.fontWeight='800';
+}
+
+function buildData(){
+  const {m,g,r}=vals();
+  samples=[];
+  const N=4000; // 촘촘하게 나눠 수치 오차를 줄임
+
+  for(let i=0;i<=N;i++){
+    const u=i/N;
+    const p=model(u);
+    const h0=2*r;
+    const v=Math.sqrt(Math.max(0,2*g*(h0-p.y)));
+    const pe=m*g*p.y;
+    const ke=.5*m*v*v;
+    samples.push({...p,u,v,pe,ke,total:pe+ke,time:0,distance:0,ds:0,dt:0});
+  }
+
+  // 아주 작은 구간을 따라 Δt ≈ Δs / 평균속력으로 주행시간을 근사
+  // 출발점 v=0 때문에 첫 구간은 특이해질 수 있으므로
+  // 첫 구간은 속도 변화에 맞춰 안전하게 처리한다.
+  for(let i=0;i<N;i++){
+    const a=samples[i], b=samples[i+1];
+    const ds=Math.hypot(b.x-a.x, b.y-a.y);
+    let dt;
+
+    if(i===0 && $('curve').value==='cycloid'){
+      // 사이클로이드는 브라키스토크론의 정확한 시간식이 존재:
+      // t = θ_end * sqrt(r/g), θ_end = π
+      // 첫 구간을 수치 적분에서 제외하고 마지막에 정확한 총 시간을 표시한다.
+      dt=0;
+    }else{
+      const vMid=Math.max(1e-7,(a.v+b.v)/2);
+      dt=ds/vMid;
+    }
+
+    a.ds=ds; a.dt=dt;
+    b.time=a.time+dt;
+    b.distance=(a.distance||0)+ds;
+  }
+
+  if($('curve').value==='cycloid'){
+    // 정확한 브라키스토크론 시간: T = π√(r/g)
+    const exact=Math.PI*Math.sqrt(r/g);
+    const raw=samples[N].time;
+    const correction=exact-raw;
+    for(const s of samples) s.time=Math.max(0,s.time+correction*s.u);
+  }
+
+  return samples;
+}
+
+
+let dualCycloidSamples=[], dualParabolaSamples=[];
+let dualRunning=false, dualElapsed=0, dualLast=0;
+
+function dualCurveSample(curve,u){
+  return comparePoint(curve,u);
+}
+
+function buildDualSamples(){
+  const N=3000;
+  dualCycloidSamples=[];
+  dualParabolaSamples=[];
+  ['cycloid','parabola'].forEach(curve=>{
+    const arr = curve==='cycloid' ? dualCycloidSamples : dualParabolaSamples;
+    let time=0, distance=0;
+    let prev=dualCurveSample(curve,0);
+    let prevV=speedFromY(prev.y);
+    arr.push({...prev,u:0,time:0,distance:0,v:prevV});
+    for(let i=1;i<=N;i++){
+      const u=i/N;
+      const p=dualCurveSample(curve,u);
+      const v=speedFromY(p.y);
+      const ds=Math.hypot(p.x-prev.x,p.y-prev.y);
+      const vm=Math.max(1e-8,(prevV+v)/2);
+      time += ds/vm;
+      distance += ds;
+      arr.push({...p,u,time,distance,v});
+      prev=p; prevV=v;
+    }
+    if(curve==='cycloid'){
+      const exact=Math.PI*Math.sqrt(vals().r/vals().g);
+      const raw=arr[arr.length-1].time;
+      const correction=exact-raw;
+      for(const s of arr) s.time=Math.max(0,s.time+correction*s.u);
+    }
+  });
+}
+
+function pointAtTime(arr,t){
+  const total=arr[arr.length-1].time;
+  const target=Math.min(t,total);
+  let lo=0,hi=arr.length-1;
+  while(lo<hi){
+    const mid=Math.floor((lo+hi)/2);
+    if(arr[mid].time<target) lo=mid+1; else hi=mid;
+  }
+  const i=Math.max(1,lo);
+  const a=arr[i-1],b=arr[i];
+  const span=Math.max(1e-9,b.time-a.time);
+  const q=Math.min(1,Math.max(0,(target-a.time)/span));
+  return {
+    x:a.x+(b.x-a.x)*q,
+    y:a.y+(b.y-a.y)*q,
+    v:a.v+(b.v-a.v)*q,
+    u:a.u+(b.u-a.u)*q,
+    time:target
+  };
+}
+
+function sceneTransform(p){
+  const xs=samples.map(s=>s.x), ys=samples.map(s=>s.y);
+  const xmin=Math.min(...xs), xmax=Math.max(...xs), ymin=0, ymax=Math.max(...ys);
+  const padX=70, padTop=75, padBottom=120;
+  const W=1000,H=510;
+  const sx=(W-2*padX)/(xmax-xmin||1);
+  const sy=(H-padTop-padBottom)/(ymax-ymin||1);
+  const s=Math.min(sx,sy);
+  const x=padX+(p.x-xmin)*s;
+  const y=padTop+(ymax-p.y)*s;
+  return {x,y,s};
+}
+
+function pathFor(){
+  const pts=samples.map(sceneTransform);
+  return pts.map((p,i)=>`${i?'L':'M'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ');
+}
+
+function renderScene(){
+  buildData();
+  buildDualSamples();
+
+  const pMain = pathFor();
+  $('track').setAttribute('d',pMain);
+  $('trackGlow').setAttribute('d',pMain);
+
+  // comparison tracks
+  $('cycloidTrack').setAttribute('d', dualPath('cycloid'));
+  $('parabolaTrack').setAttribute('d', dualPath('parabola'));
+
+  const supportG=$('supports'); supportG.innerHTML='';
+  const count=10;
+  for(let i=1;i<count;i++){
+    const idx=Math.round(i*samples.length/count);
+    const p=sceneTransform(samples[idx]);
+    const base=420;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',p.x);line.setAttribute('x2',p.x);
+    line.setAttribute('y1',p.y+8);line.setAttribute('y2',base);
+    line.setAttribute('class','support');
+    supportG.appendChild(line);
+  }
+
+  const start=sceneTransform(samples[0]);
+  const lab=$('labels'); lab.innerHTML='';
+  const dash=document.createElementNS('http://www.w3.org/2000/svg','line');
+  dash.setAttribute('x1',start.x); dash.setAttribute('x2',start.x);
+  dash.setAttribute('y1',start.y); dash.setAttribute('y2',440);
+  dash.setAttribute('class','marker'); lab.appendChild(dash);
+
+  const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+  text.setAttribute('x',start.x+10); text.setAttribute('y',start.y-15);
+  text.setAttribute('class','markerText'); text.textContent='출발 · 정지';
+  lab.appendChild(text);
+
+  $('cycloidTrack').style.opacity=0;
+  $('parabolaTrack').style.opacity=0;
+  $('dualCycloidTrain').style.opacity=0;
+  $('dualParabolaTrain').style.opacity=0;
+  $('trainGroup').style.opacity=1;
+
+  placeTrain();
+}
+
+function dualPath(curve){
+  const arr=curve==='cycloid'?dualCycloidSamples:dualParabolaSamples;
+  return arr.filter((_,i)=>i%4===0 || i===arr.length-1).map((p,i)=>{
+    const sp=sceneTransform(p);
+    return `${i?'L':'M'} ${sp.x.toFixed(2)} ${sp.y.toFixed(2)}`;
+  }).join(' ');
+}
+
+function placeTrain(){
+  if(!samples.length) return;
+  const p=sceneTransform(samples[Math.min(samples.length-1,Math.floor(pos*(samples.length-1)))]);
+  const group=$('trainGroup');
+  group.setAttribute('transform',`translate(${p.x} ${p.y-12})`);
+}
+
+function placeDualTrains(){
+  if(!dualCycloidSamples.length || !dualParabolaSamples.length) return;
+  const c=pointAtTime(dualCycloidSamples,dualElapsed);
+  const p=pointAtTime(dualParabolaSamples,dualElapsed);
+  const cp=sceneTransform(c), pp=sceneTransform(p);
+
+  // 두 트랙을 동시에 보이게 한다.
+  $('cycloidTrack').style.opacity=1;
+  $('parabolaTrack').style.opacity=1;
+  $('track').style.opacity=0.15;
+  $('trackGlow').style.opacity=0;
+
+  $('trainGroup').style.opacity=0;
+  $('dualCycloidTrain').style.opacity=1;
+  $('dualParabolaTrain').style.opacity=1;
+  $('dualCycloidTrain').setAttribute('transform',`translate(${cp.x} ${cp.y-12})`);
+  $('dualParabolaTrain').setAttribute('transform',`translate(${pp.x} ${pp.y-12})`);
+
+  $('dualCycloidTime').textContent=Math.min(dualElapsed,dualCycloidSamples.at(-1).time).toFixed(3);
+  $('dualParabolaTime').textContent=Math.min(dualElapsed,dualParabolaSamples.at(-1).time).toFixed(3);
+  $('dualCycloidSpeed').textContent=(dualElapsed<=dualCycloidSamples.at(-1).time?c.v:0).toFixed(3);
+  $('dualParabolaSpeed').textContent=(dualElapsed<=dualParabolaSamples.at(-1).time?p.v:0).toFixed(3);
+
+  const ct=dualCycloidSamples.at(-1).time, pt=dualParabolaSamples.at(-1).time;
+  if(dualElapsed<Math.min(ct,pt)){
+    $('dualWinner').textContent='두 열차 주행 중';
+  }else if(ct<pt && dualElapsed<pt){
+    $('dualWinner').textContent='🔵 사이클로이드 도착!';
+  }else if(pt<ct && dualElapsed<ct){
+    $('dualWinner').textContent='🔴 포물선 도착!';
+  }else{
+    $('dualWinner').textContent='두 열차 도착 완료';
+  }
+}
+
+function setStats(s){
+  if(!s) return;
+  $('yVal').textContent=s.y.toFixed(3);
+  $('vVal').textContent=s.v.toFixed(3);
+  $('peVal').textContent=s.pe.toFixed(3);
+  $('keVal').textContent=s.ke.toFixed(3);
+  $('eVal').textContent=s.total.toFixed(3);
+  $('live').textContent=`주행 ${Math.round(s.u*100)}% · 높이 ${s.y.toFixed(2)} m · 속력 ${s.v.toFixed(2)} m/s`;
+}
+
+function axisChart(svg, data, colorClass, yLabel){
+  svg.innerHTML='';
+  const W=900,H=300,L=60,R=20,T=18,B=45;
+  const innerW=W-L-R, innerH=H-T-B;
+  const ymax=Math.max(...data.map(x=>x.val),1)*1.08;
+  for(let i=0;i<=4;i++){
+    const yy=T+innerH*(1-i/4);
+    const gl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',L);gl.setAttribute('x2',W-R);gl.setAttribute('y1',yy);gl.setAttribute('y2',yy);gl.setAttribute('class','gridline');svg.appendChild(gl);
+    const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tx.setAttribute('x',L-10);tx.setAttribute('y',yy+4);tx.setAttribute('text-anchor','end');tx.setAttribute('class','label');tx.textContent=(ymax*i/4).toFixed(1);svg.appendChild(tx);
+  }
+  const ax=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ax.setAttribute('x1',L);ax.setAttribute('x2',L);ax.setAttribute('y1',T);ax.setAttribute('y2',H-B);ax.setAttribute('class','axis');svg.appendChild(ax);
+  const ax2=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ax2.setAttribute('x1',L);ax2.setAttribute('x2',W-R);ax2.setAttribute('y1',H-B);ax2.setAttribute('y2',H-B);ax2.setAttribute('class','axis');svg.appendChild(ax2);
+  const path=data.map((d,i)=>{
+    const x=L+innerW*(i/(data.length-1));
+    const y=T+innerH*(1-d.val/ymax);
+    return `${i?'L':'M'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+  }).join(' ');
+  const pl=document.createElementNS('http://www.w3.org/2000/svg','path');
+  pl.setAttribute('d',path);pl.setAttribute('class',colorClass);svg.appendChild(pl);
+  const yl=document.createElementNS('http://www.w3.org/2000/svg','text');
+  yl.setAttribute('x',14);yl.setAttribute('y',22);yl.setAttribute('class','label');yl.textContent=yLabel;svg.appendChild(yl);
+}
+
+function drawEnergy(){
+  const svg=$('energyChart'); svg.innerHTML='';
+  const W=900,H=300,L=60,R=20,T=18,B=45, iw=W-L-R, ih=H-T-B;
+  const maxE=Math.max(...samples.map(s=>s.total),1)*1.08;
+  for(let i=0;i<=4;i++){
+    const yy=T+ih*(1-i/4);
+    const gl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',L);gl.setAttribute('x2',W-R);gl.setAttribute('y1',yy);gl.setAttribute('y2',yy);gl.setAttribute('class','gridline');svg.appendChild(gl);
+  }
+  [
+    ['pe','#315efb','위치에너지 PE'],
+    ['ke','#ef4444','운동에너지 KE'],
+    ['total','#14a77a','전체 에너지']
+  ].forEach(([key,color,label],j)=>{
+    const path=samples.map((s,i)=>{
+      const x=L+iw*(i/(samples.length-1));
+      const y=T+ih*(1-s[key]/maxE);
+      return `${i?'L':'M'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    }).join(' ');
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',path);p.setAttribute('fill','none');p.setAttribute('stroke',color);p.setAttribute('stroke-width',key==='total'?'3':'4');p.setAttribute('stroke-linecap','round');svg.appendChild(p);
+    const legend=document.createElementNS('http://www.w3.org/2000/svg','text');
+    legend.setAttribute('x',L+10+j*190);legend.setAttribute('y',H-12);legend.setAttribute('class','label');legend.textContent=label;svg.appendChild(legend);
+  });
+}
+
+function renderTable(){
+  const b=$('tableBody'); b.innerHTML='';
+  // 0%부터 100%까지 1% 간격으로 표시: 총 101개 행
+  // 실제 계산은 4001개 샘플로 수행하고, 표에서는 읽기 쉬운 1% 간격으로 보여준다.
+  for(let pct=0; pct<=100; pct++){
+    const idx=Math.round((pct/100)*(samples.length-1));
+    const s=samples[idx];
+    const tr=document.createElement('tr');
+    const vals=[
+      `${pct}%`,
+      s.theta===null?'-':s.theta.toFixed(4),
+      s.x.toFixed(4),
+      s.y.toFixed(4),
+      s.v.toFixed(4),
+      s.pe.toFixed(4),
+      s.ke.toFixed(4),
+      s.total.toFixed(4)
+    ];
+    vals.forEach(v=>{
+      const td=document.createElement('td');
+      td.textContent=v;
+      tr.appendChild(td);
+    });
+    b.appendChild(tr);
+  }
+}
+
+function curveKoreanName(){
+  return ({cycloid:'사이클로이드',parabola:'포물선',circle:'원호',line:'직선'})[$('curve').value];
+}
+
+function calculateCurveTime(curve){
+  const {g,r}=vals();
+  const H=2*r;
+  const N=12000;
+  let time=0, distance=0;
+  let prev=comparePoint(curve,0);
+  let prevV=speedFromY(prev.y);
+  for(let i=1;i<=N;i++){
+    const u=i/N;
+    const cur=comparePoint(curve,u);
+    const ds=Math.hypot(cur.x-prev.x,cur.y-prev.y);
+    const v=speedFromY(cur.y);
+    const vm=Math.max(1e-8,(prevV+v)/2);
+    time += ds/vm;
+    distance += ds;
+    prev=cur; prevV=v;
+  }
+  if(curve==='cycloid'){
+    time=Math.PI*Math.sqrt(r/g);
+  }
+  return {time,distance};
+}
+
+function renderTimeComparison(){
+  const valsOut=['cycloid','parabola','line'].map(c=>calculateCurveTime(c));
+  const names=['사이클로이드','포물선','직선'];
+  const tbody=document.getElementById('timeCompareBody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  valsOut.forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    [names[i],d.time.toFixed(4),d.distance.toFixed(4)].forEach(v=>{
+      const td=document.createElement('td');td.textContent=v;tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function renderTimeInfo(){
+  const last=samples[samples.length-1];
+  const totalTime=last?.time ?? 0;
+  const totalDist=last?.distance ?? 0;
+  $('timeVal').textContent=totalTime.toFixed(3);
+  $('distVal').textContent=totalDist.toFixed(3);
+  $('timeBig').textContent=totalTime.toFixed(3);
+  $('distanceBig').textContent=totalDist.toFixed(3);
+  $('timeCurveName').textContent=curveKoreanName();
+
+  // 탐구용 한 줄 결과: 현재 비교에서의 사이클로이드 기준시간
+  const cycloidExact=Math.PI*Math.sqrt(vals().r/vals().g);
+  const result=document.getElementById('timeResult');
+  if(result){
+    result.textContent=`기준 사이클로이드의 주행 시간 = ${cycloidExact.toFixed(3)} s`;
+  }
+}
+function timeChart(){
+  const svg=$('timeChart'); svg.innerHTML='';
+  const W=900,H=300,L=60,R=20,T=18,B=45,iw=W-L-R,ih=H-T-B;
+  const vals=samples.map(s=>s.time||0);
+  const ymax=Math.max(...vals,0.001)*1.08;
+  for(let i=0;i<=4;i++){
+    const yy=T+ih*(1-i/4);
+    const gl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',L);gl.setAttribute('x2',W-R);gl.setAttribute('y1',yy);gl.setAttribute('y2',yy);gl.setAttribute('class','gridline');svg.appendChild(gl);
+    const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tx.setAttribute('x',L-10);tx.setAttribute('y',yy+4);tx.setAttribute('text-anchor','end');tx.setAttribute('class','label');
+    tx.textContent=(ymax*i/4).toFixed(1);svg.appendChild(tx);
+  }
+  const pth=samples.map((s,i)=>{
+    const x=L+iw*(i/(samples.length-1));
+    const y=T+ih*(1-(s.time||0)/ymax);
+    return `${i?'L':'M'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+  }).join(' ');
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',pth);p.setAttribute('fill','none');p.setAttribute('stroke','#8b5cf6');p.setAttribute('stroke-width','4');p.setAttribute('stroke-linecap','round');svg.appendChild(p);
+  const yl=document.createElementNS('http://www.w3.org/2000/svg','text');
+  yl.setAttribute('x',14);yl.setAttribute('y',22);yl.setAttribute('class','label');yl.textContent='누적 시간 (s)';svg.appendChild(yl);
+}
+
+function drawTimeSeriesChart(svg, series, yLabel, ymaxOverride=null){
+  svg.innerHTML='';
+  const W=900,H=330,L=65,R=25,T=24,B=54;
+  const iw=W-L-R, ih=H-T-B;
+  const all=series.flatMap(s=>s.values);
+  const ymax=ymaxOverride || Math.max(...all,1)*1.08;
+
+  for(let i=0;i<=5;i++){
+    const yy=T+ih*(1-i/5);
+    const gl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',L);gl.setAttribute('x2',W-R);
+    gl.setAttribute('y1',yy);gl.setAttribute('y2',yy);
+    gl.setAttribute('class','gridline');svg.appendChild(gl);
+
+    const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tx.setAttribute('x',L-10);tx.setAttribute('y',yy+4);
+    tx.setAttribute('text-anchor','end');tx.setAttribute('class','label');
+    tx.textContent=(ymax*i/5).toFixed(1);svg.appendChild(tx);
+  }
+
+  const ax=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ax.setAttribute('x1',L);ax.setAttribute('x2',L);
+  ax.setAttribute('y1',T);ax.setAttribute('y2',H-B);ax.setAttribute('class','axis');
+  svg.appendChild(ax);
+
+  const ax2=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ax2.setAttribute('x1',L);ax2.setAttribute('x2',W-R);
+  ax2.setAttribute('y1',H-B);ax2.setAttribute('y2',H-B);ax2.setAttribute('class','axis');
+  svg.appendChild(ax2);
+
+  series.forEach((s,j)=>{
+    const path=s.values.map((v,i)=>{
+      const x=L+iw*(i/(s.values.length-1));
+      const y=T+ih*(1-v/ymax);
+      return `${i?'L':'M'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    }).join(' ');
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',path);p.setAttribute('fill','none');
+    p.setAttribute('stroke',s.color);p.setAttribute('stroke-width','4');
+    p.setAttribute('stroke-linejoin','round');p.setAttribute('stroke-linecap','round');
+    svg.appendChild(p);
+
+    const lx=L+10+j*205;
+    const leg=document.createElementNS('http://www.w3.org/2000/svg','line');
+    leg.setAttribute('x1',lx);leg.setAttribute('x2',lx+24);
+    leg.setAttribute('y1',H-30);leg.setAttribute('y2',H-30);
+    leg.setAttribute('stroke',s.color);leg.setAttribute('stroke-width','4');
+    leg.setAttribute('stroke-linecap','round');svg.appendChild(leg);
+
+    const lt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lt.setAttribute('x',lx+31);lt.setAttribute('y',H-26);
+    lt.setAttribute('class','label');lt.textContent=s.name;svg.appendChild(lt);
+  });
+
+  const yl=document.createElementNS('http://www.w3.org/2000/svg','text');
+  yl.setAttribute('x',13);yl.setAttribute('y',22);
+  yl.setAttribute('class','label');yl.textContent=yLabel;svg.appendChild(yl);
+
+  const xl=document.createElementNS('http://www.w3.org/2000/svg','text');
+  xl.setAttribute('x',W/2);xl.setAttribute('y',H-7);
+  xl.setAttribute('text-anchor','middle');xl.setAttribute('class','label');
+  xl.textContent='시간 t (s)';svg.appendChild(xl);
+}
+
+function invertTimeToU(arr,t){
+  const total=arr[arr.length-1].time;
+  if(t<=0) return 0;
+  if(t>=total) return 1;
+  let lo=0,hi=arr.length-1;
+  while(lo<hi){
+    const mid=Math.floor((lo+hi)/2);
+    if(arr[mid].time<t) lo=mid+1; else hi=mid;
+  }
+  const i=Math.max(1,lo);
+  const a=arr[i-1],b=arr[i];
+  const q=(t-a.time)/Math.max(1e-12,b.time-a.time);
+  return a.u+(b.u-a.u)*q;
+}
+
+function renderTimeBasedComparison(){
+  buildDualSamples();
+
+  const ct=dualCycloidSamples.at(-1).time;
+  const pt=dualParabolaSamples.at(-1).time;
+  const maxT=Math.max(ct,pt);
+
+  const count=240;
+  const times=Array.from({length:count},(_,i)=>maxT*i/(count-1));
+
+  const cU=times.map(t=>100*invertTimeToU(dualCycloidSamples,t));
+  const pU=times.map(t=>100*invertTimeToU(dualParabolaSamples,t));
+  const cY=times.map(t=>pointAtTime(dualCycloidSamples,t).y);
+  const pY=times.map(t=>pointAtTime(dualParabolaSamples,t).y);
+
+  drawTimeSeriesChart($('timeProgressChart'),[
+    {name:'사이클로이드',color:'#315efb',values:cU},
+    {name:'포물선',color:'#ef4444',values:pU}
+  ],'진행률 (%)',100);
+
+  drawTimeSeriesChart($('timeHeightChart'),[
+    {name:'사이클로이드',color:'#315efb',values:cY},
+    {name:'포물선',color:'#ef4444',values:pY}
+  ],'높이 y (m)',2*vals().r);
+
+  $('timeCompareCycloid').textContent=ct.toFixed(3);
+  $('timeCompareParabola').textContent=pt.toFixed(3);
+  $('timeCompareGap').textContent=Math.abs(pt-ct).toFixed(3);
+}
+
+function renderCharts(){
+  axisChart($('heightChart'),samples.map(s=>({val:s.y})),'lineY','y (m)');
+  axisChart($('speedChart'),samples.map(s=>({val:s.v})),'lineV','v (m/s)');
+  drawEnergy();
+  timeChart();
+  renderTimeInfo();
+  renderComparison();
+  renderTimeBasedComparison();
+}
+
+function rebuild(){
+  pos=0; playing=false; dualRunning=false; dualElapsed=0; dualLast=0;
+  buildData(); buildDualSamples(); renderScene(); renderCharts(); renderTable(); renderTimeComparison(); renderTimeBasedComparison(); setStats(samples[0]);
+  $('dualCycloidTime').textContent='0.000';
+  $('dualParabolaTime').textContent='0.000';
+  $('dualCycloidSpeed').textContent='0.000';
+  $('dualParabolaSpeed').textContent='0.000';
+  $('dualWinner').textContent='대기';
+  $('live').textContent='대기 중 · 최고점에서 정지';
+}
+function animate(t){
+  if(!lastTime) lastTime=t;
+  const dt=(t-lastTime)/1000; lastTime=t;
+
+  if(playing){
+    pos += dt/5;
+    if(pos>=1){pos=1;playing=false;$('live').textContent='도착 · 바닥에서 최대 속력'}
+    const idx=Math.min(samples.length-1,Math.floor(pos*(samples.length-1)));
+    setStats(samples[idx]); placeTrain();
+    $('live').textContent=`주행 ${Math.round(samples[idx].u*100)}% · 경과 물리시간 ${samples[idx].time.toFixed(2)} s · 속력 ${samples[idx].v.toFixed(2)} m/s`;
+  }
+
+  if(dualRunning){
+    const dtReal = dualLast ? (t-dualLast)/1000 : 0;
+    dualLast=t;
+    dualElapsed += dtReal;
+
+    const end=Math.max(dualCycloidSamples.at(-1).time,dualParabolaSamples.at(-1).time);
+    placeDualTrains();
+
+    if(dualElapsed>=end){
+      dualElapsed=end;
+      dualRunning=false;
+      $('live').textContent=`동시 주행 완료 · 🔵 사이클로이드 ${dualCycloidSamples.at(-1).time.toFixed(3)} s · 🔴 포물선 ${dualParabolaSamples.at(-1).time.toFixed(3)} s`;
+      placeDualTrains();
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+$('play').onclick=()=>{
+  dualRunning=false;
+  buildData();
+  if(pos>=1)pos=0;
+  playing=true;
+  $('cycloidTrack').style.opacity=0;
+  $('parabolaTrack').style.opacity=0;
+  $('dualCycloidTrain').style.opacity=0;
+  $('dualParabolaTrain').style.opacity=0;
+  $('trainGroup').style.opacity=1;
+  $('live').textContent=`선택한 곡선 주행 · 총 예상 ${samples[samples.length-1].time.toFixed(2)} s`;
+};
+
+$('dualPlay').onclick=()=>{
+  playing=false;
+  buildData();
+  buildDualSamples();
+  dualElapsed=0;
+  dualLast=0;
+  dualRunning=true;
+  $('live').textContent=`동시 주행 중 · 🔵 사이클로이드 vs 🔴 포물선`;
+  $('dualWinner').textContent='두 열차 주행 중';
+  placeDualTrains();
+};
+
+
+$('pause').onclick=()=>{
+  playing=false;
+  dualRunning=false;
+  $('live').textContent='일시정지';
+};
+$('reset').onclick=()=>{
+  playing=false;
+  dualRunning=false;
+  dualElapsed=0;
+  dualLast=0;
+  rebuild();
+};
+$('curve').onchange=rebuild;
+['r','m','g'].forEach(id=>$(id).oninput=rebuild);
+
+rebuild();
+requestAnimationFrame(animate);
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $m = id => document.getElementById(id);
+  const PARTS = {
+    straight:   {name:'직선 구간', icon:'━', color:'#475569', width:3.2, delta:0, amp:0, help:'수평 직선 구간. 높이 차를 주면 경사 직선이 되며 연결부가 급격해질 수 있어.'},
+    downhill:   {name:'내리막', icon:'↘️', color:'#0ea5e9', width:4.0, delta:-3.0, amp:0, help:'부드럽게 내려가는 구간. 높이가 낮아지며 위치에너지가 운동에너지로 전환돼.'},
+    cycloid:    {name:'사이클로이드형', icon:'〽️', color:'#315efb', width:5.0, delta:-8.2, amp:0, help:'설계용 사이클로이드형 프로파일 근사. 정확한 사이클로이드 식 비교는 기존 실험에서 확인할 수 있어.'},
+    uphill:     {name:'오르막', icon:'↗️', color:'#8b5cf6', width:3.6, delta:2.8, amp:0, help:'높이가 증가하는 구간. 충분한 운동에너지가 없으면 열차가 중간에 멈출 수 있어.'},
+    arc:        {name:'원호 구간', icon:'⌒', color:'#0f766e', width:3.8, delta:0, amp:1.4, help:'원호처럼 둥글게 휘어지는 연결용 곡선 근사.'},
+    hill:       {name:'언덕', icon:'⛰️', color:'#f59e0b', width:3.8, delta:0, amp:2.0, help:'언덕 높이를 바꿔 주행 중 높이·속력과 에너지 변화를 확인해.'},
+    valley:     {name:'골짜기', icon:'⌣', color:'#14b8a6', width:3.8, delta:0, amp:-1.4, help:'아래로 휘어지는 골짜기. 지나가는 속력과 곡률을 계산해.'},
+    loop:       {name:'원형 루프', icon:'⭕', color:'#e11d48', width:5.6, delta:0, amp:0, help:'원형 루프. 루프 꼭대기의 속력과 곡률을 계산해 접촉력 부족 또는 과부하를 판정해.'},
+    generator:  {name:'발전 구간', icon:'⚡', color:'#0d9488', width:3.0, delta:0, amp:0, help:'열차의 운동에너지 일부를 전기에너지로 전환해 배터리에 저장해. 발전 중 열차는 감속해.'},
+    regenBrake: {name:'회생 제동', icon:'🧲', color:'#059669', width:2.6, delta:0, amp:0, help:'강하게 감속하며 전기에너지를 회수하는 구간. 일반 제동보다 회수량이 크지만 손실도 있어.'},
+    motor:      {name:'전동 추진', icon:'🚀', color:'#7c3aed', width:3.0, delta:0, amp:0, help:'배터리 전기를 사용해 열차에 기계적 에너지를 공급해. 배터리가 부족하면 추진 효과가 줄어.'},
+    brake:      {name:'일반 제동', icon:'🛑', color:'#64748b', width:2.5, delta:0, amp:0, help:'운동에너지를 열로 소산해 감속해. 발전용 회생 제동과 결과를 비교해 봐.'}
+  };
+  const GENERIC = type => ({...PARTS[type], type, id: `${type}-${Math.random().toString(36).slice(2,9)}`});
+  let trackParts = [];
+  let selectedIndex = -1;
+  let geometry = [];
+  let simulation = [];
+  let isPlaying = false;
+  let rafId = 0;
+  let lastWallTime = 0;
+  let simTime = 0;
+  let displayedIndex = 0;
+  let failure = null;
+  let dragSource = null;
+  let simMeta = {totalTime:0, totalDistance:0, totalGenerated:0, totalMotorUse:0, finalBattery:0, completed:false};
+
+  const fmt = (n, decimals=2) => Number.isFinite(n) ? n.toLocaleString('ko-KR',{minimumFractionDigits:decimals, maximumFractionDigits:decimals}) : '—';
+  const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
+  const smoothstep = t => t*t*(3-2*t);
+  const getParams = () => ({
+    h0: clamp(Number($m('makerStartHeight').value)||18,1,40),
+    m: clamp(Number($m('makerMass').value)||250,10,2000),
+    g: clamp(Number($m('makerGravity').value)||9.8,1,20),
+    v0: clamp(Number($m('makerStartSpeed').value)||0,0,10),
+    efficiency: clamp((Number($m('makerEfficiency').value)||75)/100,.1,1),
+    batteryCap: clamp(Number($m('makerBatteryCap').value)||60,1,500)*1000,
+    initialBattery: clamp(Number($m('makerInitialBattery').value)||0,0,500)*1000,
+    friction: clamp((Number($m('makerFriction').value)||0)/100,0,.08),
+    playRate: Number($m('makerPlayRate').value)||1.5,
+    motorEfficiency:.82,
+    motorDemandPerM:1100
+  });
+
+  function partPoint(part, t, x0, h0) {
+    const w = clamp(Number(part.width)||3,.5,15);
+    const delta = clamp(Number(part.delta)||0,-12,12);
+    const amp = clamp(Number(part.amp)||0,-6,6);
+    if(part.type==='loop') {
+      const r = w/2;
+      const a = 2*Math.PI*t;
+      return {x:x0+r*Math.sin(a), h:h0+r*(1-Math.cos(a)), radius:r};
+    }
+    const x = x0 + w*t;
+    if(part.type==='cycloid') {
+      // Smooth cycloid-inspired drop profile, with horizontal endpoint tangents for LEGO-like joins.
+      const q = t - Math.sin(2*Math.PI*t)/(2*Math.PI);
+      return {x, h:h0 + delta*q};
+    }
+    if(part.type==='downhill' || part.type==='uphill') {
+      return {x, h:h0 + delta*smoothstep(t)};
+    }
+    if(part.type==='hill' || part.type==='valley' || part.type==='arc') {
+      const shape = part.type==='arc' ? Math.pow(Math.sin(Math.PI*t),2) : 4*t*(1-t);
+      return {x, h:h0 + delta*smoothstep(t) + amp*shape};
+    }
+    return {x, h:h0+delta*t};
+  }
+
+  function buildRawGeometry() {
+    const params=getParams();
+    const raw=[{x:0,h:params.h0,kind:'start',pieceIndex:-1,tPiece:0,radius:0}];
+    let x0=0, h0=params.h0;
+    trackParts.forEach((part, idx)=>{
+      const steps=part.type==='loop'?200:80;
+      for(let j=1;j<=steps;j++) {
+        const t=j/steps;
+        const pt=partPoint(part,t,x0,h0);
+        raw.push({x:pt.x,h:pt.h,kind:part.type,pieceIndex:idx,tPiece:t,radius:pt.radius||0});
+      }
+      const end=partPoint(part,1,x0,h0);
+      x0=end.x; h0=end.h;
+    });
+    return raw;
+  }
+
+  function resampleByDistance(raw, step=.055) {
+    if(raw.length<2) return raw.slice();
+    const cum=[0];
+    for(let i=1;i<raw.length;i++) cum.push(cum[i-1]+Math.hypot(raw[i].x-raw[i-1].x,raw[i].h-raw[i-1].h));
+    const total=cum[cum.length-1];
+    if(total<1e-6) return raw.slice();
+    const out=[]; let j=0;
+    const n=Math.max(2,Math.ceil(total/step));
+    for(let k=0;k<=n;k++) {
+      const target=total*k/n;
+      while(j<cum.length-2 && cum[j+1]<target) j++;
+      const span=cum[j+1]-cum[j];
+      const f=span>1e-9?(target-cum[j])/span:0;
+      const a=raw[j], b=raw[j+1];
+      out.push({
+        x:a.x+(b.x-a.x)*f, h:a.h+(b.h-a.h)*f, s:target,
+        kind:b.kind || a.kind, pieceIndex:b.pieceIndex,
+        tPiece:(a.pieceIndex===b.pieceIndex)?(a.tPiece+(b.tPiece-a.tPiece)*f):b.tPiece,
+        radius:b.radius || a.radius || 0,
+        ds:k===0?0:target-out[out.length-1].s
+      });
+    }
+    return out;
+  }
+
+  function pointCurvature(points,i) {
+    const q=points[i];
+    if(!q || q.pieceIndex<0) return 0;
+    const type=trackParts[q.pieceIndex]?.type;
+    if(['straight','generator','regenBrake','motor','brake'].includes(type)) return 0;
+    if(type==='loop') {
+      const diameter=Number(trackParts[q.pieceIndex]?.width)||5.6;
+      return 2/Math.max(.5,diameter); // Exact curvature of the ideal circular loop.
+    }
+    // Use a short multi-sample chord inside the same curved piece. Excluding
+    // joins avoids treating discretization seams as instant structural corners.
+    const offset=4;
+    if(i<offset || i>=points.length-offset) return 0;
+    const p0=points[i-offset],p1=points[i],p2=points[i+offset];
+    if(p0.pieceIndex!==q.pieceIndex || p2.pieceIndex!==q.pieceIndex) return 0;
+    const a=Math.hypot(p1.x-p0.x,p1.h-p0.h);
+    const b=Math.hypot(p2.x-p1.x,p2.h-p1.h);
+    const c=Math.hypot(p2.x-p0.x,p2.h-p0.h);
+    if(a<1e-7||b<1e-7||c<1e-7) return 0;
+    const cross=Math.abs((p1.x-p0.x)*(p2.h-p1.h)-(p1.h-p0.h)*(p2.x-p1.x));
+    return clamp((2*cross)/(a*b*c),0,3.5);
+  }
+
+  function recompute() {
+    stopAnimation();
+    geometry=resampleByDistance(buildRawGeometry());
+    const p=getParams();
+    const batteryCap=p.batteryCap;
+    const startK=.5*p.m*p.v0*p.v0;
+    let kinetic=startK, battery=Math.min(batteryCap,p.initialBattery), generated=0, motorUse=0, time=0, stopped=false;
+    let fail=null;
+    const results=[];
+    let prev=geometry[0];
+    const curvatures=geometry.map((_,i)=>pointCurvature(geometry,i));
+    for(let i=0;i<geometry.length;i++) {
+      const q=geometry[i];
+      let harvested=0, power=0, motorDraw=0, frictionLoss=0, mechanicalLoss=0;
+      if(i>0 && !stopped) {
+        const ds=q.s-prev.s;
+        // Gravity changes kinetic energy. Friction dissipates a small fraction of mg per metre.
+        frictionLoss=p.friction*p.m*p.g*ds;
+        let candidate=kinetic + p.m*p.g*(prev.h-q.h) - frictionLoss;
+        if(candidate < -0.5) {
+          candidate=0; kinetic=0; stopped=true;
+          fail={index:i-1,type:'stall',reason:'에너지 부족: 오르막 또는 높은 구간을 통과하지 못했어.'};
+        } else {
+          kinetic=Math.max(0,candidate);
+          const kind=q.kind;
+          if(kind==='generator' || kind==='regenBrake') {
+            const intensity=kind==='generator'?.18:.62;
+            mechanicalLoss=kinetic*(1-Math.exp(-intensity*ds));
+            kinetic=Math.max(0,kinetic-mechanicalLoss);
+            harvested=mechanicalLoss*p.efficiency;
+            const storable=Math.min(harvested,Math.max(0,batteryCap-battery));
+            battery+=storable; generated+=harvested;
+          } else if(kind==='brake') {
+            mechanicalLoss=kinetic*(1-Math.exp(-.78*ds));
+            kinetic=Math.max(0,kinetic-mechanicalLoss);
+          } else if(kind==='motor') {
+            motorDraw=Math.min(battery,p.motorDemandPerM*ds);
+            battery-=motorDraw; motorUse+=motorDraw;
+            kinetic+=motorDraw*p.motorEfficiency;
+          }
+          const avgSpeed=(Math.sqrt(Math.max(0,2*results[i-1]?.kinetic/p.m||0))+Math.sqrt(Math.max(0,2*kinetic/p.m)))/2;
+          const dt=ds/Math.max(avgSpeed,.22);
+          time+=dt;
+          power=dt>1e-7?harvested/dt:0;
+        }
+      }
+      const v=Math.sqrt(Math.max(0,2*kinetic/p.m));
+      const kappa=curvatures[i];
+      const gLoad=(v*v*kappa)/p.g;
+      const result={...q,kinetic,v,battery,generated,motorUse,time,power,harvested,frictionLoss,mechanicalLoss,curvature:kappa,gLoad};
+      results.push(result);
+      if(!fail && q.h < -0.02) fail={index:i,type:'impact',reason:'트랙이 지면 아래로 내려갔어. 지면 충돌 판정!'};
+      if(!fail && i>2 && gLoad>7.5) fail={index:i,type:'break',reason:`${q.pieceIndex>=0?(PARTS[trackParts[q.pieceIndex]?.type]?.name||'트랙'):'출발'} 구간의 급격한 곡률로 과부하 기준(7.5 g)을 초과했어 (${fmt(gLoad,1)} g).`};
+      prev=q;
+    }
+
+    // A loop must retain contact near its top: v²/r >= g in this simplified model.
+    const loopGroups=new Map();
+    results.forEach((q,i)=>{
+      if(q.kind==='loop') {
+        if(!loopGroups.has(q.pieceIndex)) loopGroups.set(q.pieceIndex,[]);
+        loopGroups.get(q.pieceIndex).push(i);
+      }
+    });
+    for(const [pieceIdx,inds] of loopGroups) {
+      const topIdx=inds.reduce((best,i)=>results[i].h>results[best].h?i:best,inds[0]);
+      const r=(Number(trackParts[pieceIdx]?.width)||5.6)/2;
+      const topSpeed2=results[topIdx].v**2;
+      if(topSpeed2/r < p.g && (!fail || topIdx<fail.index)) {
+        fail={index:topIdx,type:'break',reason:`루프 꼭대기 속력이 부족해 트랙 접촉을 유지하지 못했어 (${fmt(results[topIdx].v,2)} m/s).`};
+      }
+    }
+    // Store the curvature test result for UI and use the first failure point as the stop point.
+    if(fail) {
+      fail.index=clamp(fail.index,0,results.length-1);
+      if(fail.type==='break'||fail.type==='impact') {
+        results[fail.index].failure=true;
+      }
+    }
+    simulation=results;
+    const endIndex=fail?fail.index:Math.max(0,results.length-1);
+    simMeta={
+      totalTime:results[endIndex]?.time||0,
+      totalDistance:results[endIndex]?.s||0,
+      totalGenerated:results[endIndex]?.generated||0,
+      totalMotorUse:results[endIndex]?.motorUse||0,
+      finalBattery:results[endIndex]?.battery||0,
+      completed:!fail,
+      failIndex:fail?fail.index:null
+    };
+    failure=fail;
+    simTime=0; displayedIndex=0;
+    renderTrack();
+    renderMetrics(simulation[0]);
+    renderEnergyChart();
+    renderDataTable();
+    renderSummary();
+    renderFailureMark(0);
+    setStatus(trackParts.length ? (failure ? '분석 완료 · 실패 가능성 감지' : '설계 분석 완료 · 출발 준비') : '부품을 추가해 트랙을 만들어 봐', failure?(failure.type==='stall'?'warn':'bad'):'');
+  }
+
+  function screenTransform(points=geometry) {
+    if(!points.length) return {sx:x=>40+x*30, sy:h=>330-h*12, sxScale:30, syScale:12, groundY:330};
+    const xs=points.map(p=>p.x), hs=points.map(p=>p.h);
+    let xmin=Math.min(...xs), xmax=Math.max(...xs);
+    if(Math.abs(xmax-xmin)<1) xmax=xmin+1;
+    let hmin=Math.min(0,...hs)-.8, hmax=Math.max(...hs)+1.8;
+    if(hmax-hmin<3) hmax=hmin+3;
+    const sxVal=900/(xmax-xmin);
+    const syVal=285/(hmax-hmin);
+    return {sx:x=>50+(x-xmin)*sxVal, sy:h=>342-(h-hmin)*syVal, sxScale:sxVal, syScale:syVal, groundY:342-(0-hmin)*syVal, xmin,xmax,hmin,hmax};
+  }
+
+  function screenPoint(p,tr) {
+    let x=tr.sx(p.x), y=tr.sy(p.h);
+    if(p && p.pieceIndex>=0 && trackParts[p.pieceIndex]?.type==='loop') {
+      // Keep circular loop pieces round on screen even though the full track is fitted to a wide canvas.
+      const r=(Number(trackParts[p.pieceIndex]?.width)||5.6)/2;
+      const x0=p.x-r*Math.sin(2*Math.PI*(p.tPiece||0));
+      x=tr.sx(x0)+(p.x-x0)*tr.syScale;
+    }
+    return {x,y};
+  }
+  function drawPath(points,tr) {
+    if(!points.length) return '';
+    return points.map((p,i)=>{const z=screenPoint(p,tr);return `${i?'L':'M'}${z.x.toFixed(2)},${z.y.toFixed(2)}`;}).join(' ');
+  }
+
+  function renderTrack() {
+    const piecesG=$m('makerPieces'), supportsG=$m('makerSupports'), markerG=$m('makerPartMarkers');
+    const scene=$m('makerScene');
+    if(!piecesG||!scene) return;
+    const tr=screenTransform(geometry.length?geometry:[{x:0,h:getParams().h0},{x:20,h:getParams().h0}]);
+    const groundY=clamp(tr.groundY,35,405);
+    $m('makerGround').setAttribute('y',groundY.toFixed(2));
+    $m('makerGround').setAttribute('height',(410-groundY).toFixed(2));
+    $m('makerGroundLine').setAttribute('d',`M0 ${groundY.toFixed(2)} H1000`);
+    piecesG.innerHTML=''; supportsG.innerHTML=''; markerG.innerHTML='';
+    if(!geometry.length || !trackParts.length) {
+      $m('makerTrain').setAttribute('transform',`translate(80 ${tr.sy(getParams().h0)})`);
+      $m('makerFailureMark').setAttribute('opacity','0');
+      return;
+    }
+    // Render each individual piece with its own color; adjacent endpoints are shared.
+    const grouped=trackParts.map((p,idx)=>({part:p, idx, pts:geometry.filter(q=>q.pieceIndex===idx)}));
+    grouped.forEach(({part,idx,pts})=>{
+      if(pts.length<2) return;
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',drawPath(pts,tr));
+      path.setAttribute('fill','none'); path.setAttribute('stroke',PARTS[part.type]?.color||'#475569');
+      path.setAttribute('stroke-width',part.type==='generator'||part.type==='regenBrake'?8:6.5);
+      path.setAttribute('stroke-linecap','round'); path.setAttribute('stroke-linejoin','round');
+      if(part.type==='generator'||part.type==='regenBrake') path.setAttribute('stroke-dasharray','12 4');
+      if(part.type==='motor') path.setAttribute('stroke-dasharray','5 4');
+      path.setAttribute('opacity','.98'); piecesG.appendChild(path);
+      // A small endpoint marker makes the modular construction visible.
+      const p=pts[Math.floor(pts.length*.5)];
+      if(p && (part.type==='generator'||part.type==='regenBrake'||part.type==='motor'||part.type==='brake')) {
+        const tx=tr.sx(p.x), ty=tr.sy(p.h)-16;
+        const badge=document.createElementNS('http://www.w3.org/2000/svg','g');
+        const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+        rect.setAttribute('x',tx-16);rect.setAttribute('y',ty-12);rect.setAttribute('width',32);rect.setAttribute('height',23);rect.setAttribute('rx',7);rect.setAttribute('fill','#fff');rect.setAttribute('stroke',PARTS[part.type].color);rect.setAttribute('stroke-width','1.5');
+        const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+        text.setAttribute('x',tx);text.setAttribute('y',ty+4);text.setAttribute('font-size','15');text.setAttribute('text-anchor','middle');
+        text.textContent=part.type==='generator'?'⚡':part.type==='regenBrake'?'🧲':part.type==='motor'?'🚀':'Ⅱ';
+        badge.appendChild(rect);badge.appendChild(text);markerG.appendChild(badge);
+      }
+    });
+    // Support pillars along the route, excluding the loop's upper part.
+    const seen=[];
+    for(let i=4;i<geometry.length-2;i+=Math.max(5,Math.round(1.35/(geometry[i].ds||.05)))) {
+      const p=geometry[i];
+      if(p.h<0.3 || p.kind==='loop') continue;
+      if(seen.some(q=>Math.hypot(q.x-p.x,q.h-p.h)<1.1)) continue;
+      seen.push(p);
+      const x=tr.sx(p.x),y=tr.sy(p.h);
+      if(y<groundY-3) {
+        const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',x);line.setAttribute('x2',x-5);line.setAttribute('y1',y+4);line.setAttribute('y2',groundY);line.setAttribute('stroke','#96a3b4');line.setAttribute('stroke-width','3');
+        supportsG.appendChild(line);
+      }
+    }
+    drawTrainAt(simulation[0]||geometry[0],0,tr);
+    renderFailureMark(displayedIndex,tr);
+  }
+
+  function drawTrainAt(q,index,tr=screenTransform()) {
+    if(!q) return;
+    let next=simulation[Math.min(index+1,simulation.length-1)]||q;
+    let prev=simulation[Math.max(0,index-1)]||q;
+    const here=screenPoint(q,tr), a=screenPoint(prev,tr), b=screenPoint(next,tr);
+    const x=here.x, y=here.y;
+    const angle=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+    $m('makerTrain').setAttribute('transform',`translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${angle.toFixed(2)})`);
+  }
+
+  function renderFailureMark(index,tr=screenTransform()) {
+    const g=$m('makerFailureMark');
+    if(!failure || index<failure.index-1 || !simulation[failure.index]) {g.setAttribute('opacity','0');g.innerHTML='';return;}
+    const q=simulation[failure.index],z=screenPoint(q,tr),x=z.x,y=z.y;
+    g.setAttribute('opacity','1');g.innerHTML=`<circle cx="${x}" cy="${y-3}" r="20" fill="#fff" stroke="#ef4444" stroke-width="4"/><path d="M ${x-9} ${y-12} L ${x+9} ${y+6} M ${x+9} ${y-12} L ${x-9} ${y+6}" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><text x="${x}" y="${y-31}" font-size="14" font-weight="900" text-anchor="middle" fill="#b91c1c">${failure.type==='stall'?'STOP':'CRASH'}</text>`;
+  }
+
+  function interpolateAtTime(t) {
+    if(!simulation.length) return null;
+    let lo=0, hi=simulation.length-1;
+    while(lo<hi) {const mid=(lo+hi)>>1;if(simulation[mid].time<t)lo=mid+1;else hi=mid;}
+    const i=Math.max(0,lo-1),a=simulation[i],b=simulation[Math.min(i+1,simulation.length-1)];
+    const f=b.time>a.time?clamp((t-a.time)/(b.time-a.time),0,1):0;
+    const mix=k=>(a[k]||0)+((b[k]||0)-(a[k]||0))*f;
+    const q={...a};
+    ['x','h','s','kinetic','v','battery','generated','motorUse','power','time','gLoad','curvature'].forEach(k=>q[k]=mix(k));
+    return {q,index:f<.5?i:i+1};
+  }
+
+  function renderMetrics(q) {
+    if(!q) return;
+    const p=getParams();
+    const pe=p.m*p.g*q.h;
+    $m('makerSpeed').textContent=fmt(q.v,2);
+    $m('makerHeight').textContent=fmt(q.h,2);
+    $m('makerKE').textContent=fmt(q.kinetic/1000,2);
+    $m('makerPE').textContent=fmt(pe/1000,2);
+    $m('makerPower').textContent=fmt(q.power,1);
+    $m('makerGenerated').textContent=fmt(q.generated/1000,2);
+    $m('makerBattery').textContent=fmt(q.battery/1000,2);
+    $m('makerGLoad').textContent=fmt(q.gLoad,2);
+    $m('makerMechanical').textContent=fmt((q.kinetic+pe)/1000,2);
+    $m('makerMotorUse').textContent=fmt(q.motorUse/1000,2);
+    $m('makerElapsed').textContent=fmt(q.time,2);
+    $m('makerTotalTime').textContent=simMeta.totalTime?fmt(simMeta.totalTime,2):'—';
+  }
+
+  function setStatus(message,kind='') {
+    const el=$m('makerStatus'); el.textContent=message; el.className='maker-status'+(kind?' '+kind:'');
+  }
+
+  function renderEnergyChart() {
+    const svg=$m('makerEnergyChart');
+    if(!svg) return;
+    const W=900,H=230,L=54,R=16,T=15,B=35,iw=W-L-R,ih=H-T-B;
+    svg.innerHTML='';
+    if(simulation.length<2) {svg.innerHTML='<text x="450" y="112" text-anchor="middle" fill="#718096" font-size="14">트랙을 만들면 에너지 그래프가 나타나.</text>';return;}
+    const p=getParams();
+    const chartEnd=failure?failure.index:simulation.length-1;
+    const chartRows=simulation.slice(0,Math.max(1,chartEnd+1));
+    const maxTime=Math.max(.1,chartRows[chartRows.length-1]?.time||simMeta.totalTime||0);
+    const energies=chartRows.map(q=>[p.m*p.g*q.h/1000,q.kinetic/1000,q.battery/1000,(q.kinetic+p.m*p.g*q.h)/1000]);
+    const ymax=Math.max(1,...energies.flat())*1.12;
+    for(let i=0;i<=4;i++) {
+      const y=T+ih*(1-i/4);
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');line.setAttribute('x1',L);line.setAttribute('x2',W-R);line.setAttribute('y1',y);line.setAttribute('y2',y);line.setAttribute('stroke','#e5ebf3');svg.appendChild(line);
+      const lab=document.createElementNS('http://www.w3.org/2000/svg','text');lab.setAttribute('x',L-9);lab.setAttribute('y',y+4);lab.setAttribute('text-anchor','end');lab.setAttribute('font-size','11');lab.setAttribute('fill','#6b7b90');lab.textContent=fmt(ymax*i/4,0);svg.appendChild(lab);
+    }
+    const xOf=q=>L+((maxTime>0?q.time/maxTime:0)*iw);
+    const yOf=v=>T+ih*(1-v/ymax);
+    const colors=['#315efb','#ef4444','#0d9488','#64748b'];
+    for(let s=0;s<4;s++) {
+      let d='';
+      const targetCount=Math.min(180,Math.max(2,chartRows.length));
+      for(let j=0;j<targetCount;j++) {
+        const idx=Math.round(j/(targetCount-1)*(chartRows.length-1));
+        const q=chartRows[idx],v=energies[idx][s];
+        d+=`${j?'L':'M'}${xOf(q).toFixed(2)},${yOf(v).toFixed(2)} `;
+      }
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke',colors[s]);path.setAttribute('stroke-width',s===3?2.5:3);path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');if(s===3)path.setAttribute('stroke-dasharray','6 5');svg.appendChild(path);
+    }
+    const axis=document.createElementNS('http://www.w3.org/2000/svg','path');axis.setAttribute('d',`M${L} ${T} V${T+ih} H${W-R}`);axis.setAttribute('fill','none');axis.setAttribute('stroke','#94a3b8');axis.setAttribute('stroke-width','1.2');svg.appendChild(axis);
+    const xlabel=document.createElementNS('http://www.w3.org/2000/svg','text');xlabel.setAttribute('x',W-R);xlabel.setAttribute('y',H-6);xlabel.setAttribute('text-anchor','end');xlabel.setAttribute('fill','#6b7b90');xlabel.setAttribute('font-size','11');xlabel.textContent='시간 (s)';svg.appendChild(xlabel);
+  }
+
+  function renderDataTable() {
+    const body=$m('makerDataBody');
+    if(!simulation.length) {body.innerHTML='<tr><td colspan="10" style="text-align:center;color:#718096">부품을 추가해 계산 데이터를 만들어 봐.</td></tr>';return;}
+    const indices=[];
+    const end=failure?failure.index:simulation.length-1;
+    for(let j=0;j<=12;j++) indices.push(Math.round(end*j/12));
+    body.innerHTML=[...new Set(indices)].map(i=>{
+      const q=simulation[i];const p=getParams();const name=q.pieceIndex>=0?(PARTS[trackParts[q.pieceIndex]?.type]?.name||'구간'):'출발';
+      return `<tr><td>${fmt(q.time,3)}</td><td>${fmt(q.s,2)}</td><td style="text-align:left">${name}</td><td>${fmt(q.h,2)}</td><td>${fmt(q.v,2)}</td><td>${fmt(p.m*p.g*q.h/1000,2)}</td><td>${fmt(q.kinetic/1000,2)}</td><td>${fmt(q.battery/1000,2)}</td><td>${fmt(q.generated/1000,2)}</td><td>${fmt(q.gLoad,2)}</td></tr>`;
+    }).join('');
+  }
+
+  function renderSummary() {
+    const counts={};trackParts.forEach(p=>counts[p.type]=(counts[p.type]||0)+1);
+    $m('makerSummaryParts').textContent=trackParts.length?trackParts.map(p=>PARTS[p.type].name).join(' → '):'아직 부품이 없어.';
+    const genCount=(counts.generator||0)+(counts.regenBrake||0);
+    $m('makerSummaryEnergy').textContent=genCount?`발전 장치 ${genCount}개 · 예상 누적 생산 ${fmt(simMeta.totalGenerated/1000,2)} kJ · 배터리 잔량 ${fmt(simMeta.finalBattery/1000,2)} kJ.`:'발전·회생 제동 구간이 없어 전기를 생산하지 않아. 부품 창고에서 ⚡ 또는 🧲를 추가해 봐.';
+    $m('makerSummaryFailure').textContent=failure?failure.reason:(trackParts.length?'시뮬레이션 기준에서 완주 가능해 보여. 실제 안전 검증을 뜻하지는 않아.':'출발 전 설계를 계산해 확인해 봐.');
+    if(failure) setStatus(failure.type==='stall'?'⚠️ 열차 정지 가능':'💥 위험 구조 감지',failure.type==='stall'?'warn':'bad');
+  }
+
+  function renderPartsList() {
+    const list=$m('makerPieceList');
+    $m('makerPartCount').textContent=`${trackParts.length}개`;
+    if(!trackParts.length) {list.innerHTML='<div style="font-size:12px;color:#76859a;padding:14px 7px;text-align:center">부품 창고에서 첫 부품을 추가해 봐.</div>';selectedIndex=-1;updateEditor();return;}
+    list.innerHTML=trackParts.map((p,i)=>`<div class="piece-item ${i===selectedIndex?'selected':''}" data-index="${i}" draggable="true" tabindex="0" role="button" aria-label="${PARTS[p.type].name}, ${i+1}번째 부품">
+      <span class="piece-color" style="background:${PARTS[p.type].color}"></span>
+      <div><div class="piece-name">${i+1}. ${PARTS[p.type].icon} ${PARTS[p.type].name}</div><div class="piece-meta">길이 ${fmt(p.width,1)} m · 높이 변화 ${fmt(p.delta,1)} m</div></div>
+      <div class="piece-actions"><button type="button" data-act="up" aria-label="위로">↑</button><button type="button" data-act="down" aria-label="아래로">↓</button><button type="button" data-act="remove" class="remove-piece" aria-label="삭제">×</button></div>
+    </div>`).join('');
+    list.querySelectorAll('.piece-item').forEach(el=>{
+      el.addEventListener('click',ev=>{
+        const act=ev.target?.dataset?.act;
+        const i=Number(el.dataset.index);
+        if(act==='up'){movePart(i,i-1);return;}
+        if(act==='down'){movePart(i,i+1);return;}
+        if(act==='remove'){removePart(i);return;}
+        if(!act){selectedIndex=i;renderPartsList();updateEditor();renderTrack();}
+      });
+      el.addEventListener('dragstart',ev=>{dragSource={kind:'list',index:Number(el.dataset.index)};el.classList.add('dragging');ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',`list:${el.dataset.index}`);});
+      el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+      el.addEventListener('dragover',ev=>{ev.preventDefault();el.style.borderColor='#315efb';});
+      el.addEventListener('dragleave',()=>el.style.borderColor='');
+      el.addEventListener('drop',ev=>{ev.preventDefault();el.style.borderColor='';if(dragSource?.kind==='list'){movePart(dragSource.index,Number(el.dataset.index));dragSource=null;}else if(dragSource?.kind==='palette'){addPart(dragSource.type,Number(el.dataset.index));dragSource=null;}});
+    });
+    updateEditor();
+  }
+
+  function updateEditor() {
+    const valid=selectedIndex>=0 && trackParts[selectedIndex];
+    ['makerPieceWidth','makerPieceDelta','makerPieceAmp'].forEach(id=>$m(id).disabled=!valid);
+    if(!valid) { $m('makerPieceHelp').textContent='목록에서 부품을 선택하면 세부 값을 수정할 수 있어.';return; }
+    const p=trackParts[selectedIndex],meta=PARTS[p.type];
+    $m('makerPieceWidth').value=Number(p.width).toFixed(1);
+    $m('makerPieceDelta').value=Number(p.delta).toFixed(1);
+    $m('makerPieceAmp').value=Number(p.amp).toFixed(1);
+    $m('makerPieceHelp').textContent=meta.help;
+    $m('makerPieceAmp').disabled=!['arc','hill','valley'].includes(p.type);
+    $m('makerPieceDelta').disabled=['loop','generator','regenBrake','motor','brake','straight'].includes(p.type) ? p.type!=='straight' : false;
+  }
+
+  function addPart(type, index=trackParts.length) {
+    if(!PARTS[type]) return;
+    const p=GENERIC(type);
+    trackParts.splice(clamp(index,0,trackParts.length),0,p);
+    selectedIndex=clamp(index,0,trackParts.length-1);
+    renderPartsList();recompute();
+  }
+  function removePart(i) {
+    if(i<0||i>=trackParts.length)return;
+    trackParts.splice(i,1);
+    selectedIndex=trackParts.length?Math.min(i,trackParts.length-1):-1;
+    renderPartsList();recompute();
+  }
+  function movePart(from,to) {
+    if(from<0||from>=trackParts.length||to<0||to>=trackParts.length||from===to)return;
+    const [p]=trackParts.splice(from,1);trackParts.splice(to,0,p);
+    selectedIndex=to;renderPartsList();recompute();
+  }
+
+  function stopAnimation() {isPlaying=false;if(rafId) cancelAnimationFrame(rafId);rafId=0;lastWallTime=0;}
+  function resetSimulation() {
+    stopAnimation();simTime=0;displayedIndex=0;
+    if(simulation.length) {renderMetrics(simulation[0]);drawTrainAt(simulation[0],0);renderFailureMark(0);}
+    if(failure) setStatus(failure.type==='stall'?'⚠️ 에너지 부족 예상':'💥 위험 구조 감지',failure.type==='stall'?'warn':'bad');
+    else setStatus(trackParts.length?'처음 위치 · 출발 준비':'부품을 추가해 트랙을 만들어 봐');
+  }
+  function startRun() {
+    if(!trackParts.length){setStatus('먼저 트랙 부품을 추가해 줘','warn');return;}
+    stopAnimation();recompute();
+    if(!simulation.length)return;
+    simTime=0;displayedIndex=0;isPlaying=true;lastWallTime=0;
+    setStatus('🚃 주행 중', 'good');
+    rafId=requestAnimationFrame(animate);
+  }
+  function animate(now) {
+    if(!isPlaying) return;
+    if(!lastWallTime) lastWallTime=now;
+    const dt=Math.min(.07,(now-lastWallTime)/1000);lastWallTime=now;
+    simTime += dt*getParams().playRate;
+    const endTime=simMeta.totalTime;
+    const failT=failure&&simulation[failure.index]?simulation[failure.index].time:Infinity;
+    if(simTime>=Math.min(endTime,failT) && (failure || simTime>=endTime)) simTime=Math.min(endTime,failT);
+    const state=interpolateAtTime(simTime);
+    if(state){displayedIndex=state.index;renderMetrics({...state.q,time:simTime});drawTrainAt(state.q,state.index);renderFailureMark(state.index);}
+    if(failure && simTime>=failT-1e-4) {
+      stopAnimation();
+      if(failure.type==='stall') setStatus('⚠️ 열차 정지 · 에너지 부족','warn'); else setStatus('💥 트랙 파손 / 주행 실패','bad');
+      renderSummary();return;
+    }
+    if(simTime>=endTime-1e-4) {
+      stopAnimation();setStatus('🏁 도착 · 주행 완료','good');renderSummary();return;
+    }
+    rafId=requestAnimationFrame(animate);
+  }
+
+  function exportCSV() {
+    if(!simulation.length){setStatus('내보낼 데이터가 없어. 먼저 부품을 추가해 줘.','warn');return;}
+    const p=getParams();
+    const header=['time_s','distance_m','segment','x_m','height_m','speed_m_s','PE_J','KE_J','mechanical_energy_J','battery_J','generated_cumulative_J','instant_power_W','curvature_1_per_m','centripetal_g','motor_electricity_used_J'];
+    const rows=[header.join(',')];
+    const end=failure?failure.index:simulation.length-1;
+    for(let i=0;i<=end;i++) {
+      const q=simulation[i],part=q.pieceIndex>=0?PARTS[trackParts[q.pieceIndex]?.type]?.name:'출발';
+      const vals=[q.time,q.s,`"${part||'start'}"`,q.x,q.h,q.v,p.m*p.g*q.h,q.kinetic,q.kinetic+p.m*p.g*q.h,q.battery,q.generated,q.power,q.curvature,q.gLoad,q.motorUse];
+      rows.push(vals.map(v=>typeof v==='number'?String(Number.isFinite(v)?v.toFixed(6):''):v).join(','));
+    }
+    const blob=new Blob(['\ufeff'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='roller_coaster_self_powered_data.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
+  function applyPreset(value) {
+    stopAnimation();
+    if(value==='starter') {
+      $m('makerStartHeight').value=18;$m('makerEfficiency').value=75;$m('makerInitialBattery').value=0;
+      trackParts=[GENERIC('cycloid'),GENERIC('straight'),GENERIC('loop'),GENERIC('generator'),GENERIC('hill'),GENERIC('regenBrake')];
+      trackParts[0].width=8.5;trackParts[0].delta=-8.2;trackParts[1].width=2.5;trackParts[2].width=5.6;trackParts[3].width=3;trackParts[4].amp=1.8;trackParts[5].width=2.6;
+    } else if(value==='loopRisk') {
+      $m('makerStartHeight').value=18;
+      trackParts=[GENERIC('downhill'),GENERIC('straight'),GENERIC('loop'),GENERIC('generator'),GENERIC('brake')];
+      trackParts[0].width=10.5;trackParts[0].delta=-7.0;trackParts[1].width=2.2;trackParts[2].width=1.4;trackParts[3].width=2.5;trackParts[4].width=2.0;
+    } else if(value==='eco') {
+      $m('makerStartHeight').value=18;$m('makerEfficiency').value=85;$m('makerBatteryCap').value=80;
+      trackParts=[GENERIC('cycloid'),GENERIC('regenBrake'),GENERIC('valley'),GENERIC('generator'),GENERIC('hill'),GENERIC('generator'),GENERIC('motor'),GENERIC('brake')];
+      trackParts[0].width=5.4;trackParts[0].delta=-8;trackParts[1].width=3.2;trackParts[2].amp=-1.2;trackParts[3].width=3.8;trackParts[4].amp=1.4;trackParts[5].width=3;trackParts[6].width=2.8;trackParts[7].width=2.4;
+    } else if(value==='custom') { return; }
+    selectedIndex=trackParts.length?0:-1;renderPartsList();recompute();resetSimulation();
+    $m('makerPreset').value='custom';
+  }
+
+  // Palette: click to append, drag to stage or to a specific list position.
+  document.querySelectorAll('#makerPalette .part-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>addPart(btn.dataset.type));
+    btn.addEventListener('dragstart',ev=>{dragSource={kind:'palette',type:btn.dataset.type};ev.dataTransfer.effectAllowed='copy';ev.dataTransfer.setData('text/plain',`palette:${btn.dataset.type}`);$m('makerDropHint').classList.add('drag-hot');});
+    btn.addEventListener('dragend',()=>{$m('makerDropHint').classList.remove('drag-hot');});
+  });
+  const scene=$m('makerScene');
+  scene.addEventListener('dragover',ev=>{ev.preventDefault();scene.style.outline='3px dashed #315efb';$m('makerDropHint').classList.add('drag-hot');});
+  scene.addEventListener('dragleave',()=>{scene.style.outline='';$m('makerDropHint').classList.remove('drag-hot');});
+  scene.addEventListener('drop',ev=>{ev.preventDefault();scene.style.outline='';$m('makerDropHint').classList.remove('drag-hot');if(dragSource?.kind==='palette'){addPart(dragSource.type);dragSource=null;}});
+
+  ['makerPieceWidth','makerPieceDelta','makerPieceAmp'].forEach(id=>$m(id).addEventListener('change',()=>{
+    if(selectedIndex<0||!trackParts[selectedIndex])return;
+    const p=trackParts[selectedIndex];
+    if(id==='makerPieceWidth')p.width=clamp(Number($m(id).value)||3,.5,15);
+    if(id==='makerPieceDelta')p.delta=clamp(Number($m(id).value)||0,-12,12);
+    if(id==='makerPieceAmp')p.amp=clamp(Number($m(id).value)||0,-6,6);
+    renderPartsList();recompute();
+  }));
+  ['makerStartHeight','makerMass','makerGravity','makerStartSpeed','makerEfficiency','makerBatteryCap','makerInitialBattery','makerFriction'].forEach(id=>$m(id).addEventListener('change',()=>recompute()));
+  $m('makerRun').addEventListener('click',startRun);
+  $m('makerPause').addEventListener('click',()=>{stopAnimation();setStatus('일시 정지','warn');});
+  $m('makerReset').addEventListener('click',resetSimulation);
+  $m('makerDefault').addEventListener('click',()=>applyPreset('starter'));
+  $m('makerClear').addEventListener('click',()=>{stopAnimation();trackParts=[];selectedIndex=-1;failure=null;renderPartsList();recompute();setStatus('트랙 비움');});
+  $m('makerExport').addEventListener('click',exportCSV);
+  $m('makerPreset').addEventListener('change',ev=>applyPreset(ev.target.value));
+  $m('makerPieceList').addEventListener('dragover',ev=>{ev.preventDefault();});
+
+  // Initial Lego coaster: descent, run-up, loop, generator, hill and regenerative braking.
+  applyPreset('starter');
+})();
+</script>
+
+</body>
+</html>
